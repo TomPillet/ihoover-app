@@ -1,0 +1,88 @@
+.grid-settings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 8px;
+  width: 40vw;
+  
+  .grid-param {
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    margin-left: 8px;
+    padding: 8px;
+    width: 80px;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    &:focus {
+      border-bottom: 1px solid #131313;
+      outline: none;
+    }
+  }
+}
+
+.grid-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 60vh;
+  width: calc(100vw - 32px);
+  margin: 16px;
+}
+
+.grid-layout {
+  display: block;
+  height: 100%;
+  width: 60%;
+  border: 1px solid black;
+}
+
+.grid-instructions {
+  display: block;
+  margin: auto;
+  width: 36%;
+  text-align: center;
+
+  & .switch-mode {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 16px auto;
+    width: fit-content;
+
+    & .mode {
+      margin: 0 16px;
+    }
+  }
+
+  .instructions-btn {
+    margin: 0 8px;
+  }
+}
+
+.btn {
+  background: none;
+  border: none;
+  border-radius: 2px;
+  padding: 8px;
+  min-width: 80px;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &.btn-action {
+    background-color: #f4f4f4;
+
+    &:hover {
+      background-color: #eee;
+    }
+  }
+}
