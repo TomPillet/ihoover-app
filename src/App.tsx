@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 
 import Canvas from './components/Canvas/Canvas';
-import Switcher from './components/Switcher/Switcher';
+import ToggleSwitcher from './components/ToggleSwitcher/ToggleSwitcher';
 
 function App() {
+  const [useScript, setUseScript] = useState(false);
+
+  const toggleScript = (toggleData: boolean) => {
+    setUseScript(toggleData);
+  }
+
   return (
     <div className="App">
       
@@ -15,7 +21,7 @@ function App() {
         <label htmlFor="grid-sizeY">Cases sur l'axe Y
           <input type="number" className="grid-param" id="grid-sizeY"/>
         </label>
-        <button className='btn btn-action' onClick={() => console.log('reload')}>Reload</button>
+        <button className='btn btn-valid' onClick={() => console.log('reload')}>Reload</button>
       </div>
 
       <div className="grid-wrapper">
@@ -28,14 +34,21 @@ function App() {
           
           <div className="switch-mode">
             <span className="mode">Manual</span>
-            <Switcher></Switcher>
-            <span className="mode">Auto</span>
+            <ToggleSwitcher toggler={() => toggleScript(!useScript)}></ToggleSwitcher>
+            <span className="mode">Script</span>
           </div>
 
-          <div className="instructions-card">
-            <button className="btn btn-action instructions-btn" onClick={() => console.log('droite')}>Droite</button>
-            <button className="btn btn-action instructions-btn" onClick={() => console.log('gauche')}>Gauche</button>
-            <button className="btn btn-action instructions-btn" onClick={() => console.log('avancer')}>Avancer</button>
+          <div className="instructions-wrapper">
+            <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
+              <textarea name="script" id="script"></textarea>
+              <button className='btn btn-valid script-btn' onClick={() => console.log('reload')}>Play</button>
+            </div>
+
+            <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
+              <button className="btn btn-action manual-btn" onClick={() => console.log('droite')}>Droite</button>
+              <button className="btn btn-action manual-btn" onClick={() => console.log('gauche')}>Gauche</button>
+              <button className="btn btn-action manual-btn" onClick={() => console.log('avancer')}>Avant</button>
+            </div>
           </div>
 
         </div>

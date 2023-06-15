@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 8px 8px;
-  width: 40vw;
+  max-width: 560px;
   
   .grid-param {
     box-sizing: border-box;
@@ -47,10 +47,17 @@
 }
 
 .grid-instructions {
-  display: block;
+  display: flex;
+  flex-direction: column;
   margin: auto;
+  padding: 16px;
+  height: calc(100% - (16px*2));
   width: 36%;
   text-align: center;
+
+  .instructions-header {
+    margin: 0;
+  }
 
   & .switch-mode {
     display: flex;
@@ -63,10 +70,53 @@
       margin: 0 16px;
     }
   }
+}
 
-  .instructions-btn {
-    margin: 0 8px;
+.instructions-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50%;
+  width: 60%;
+  margin: auto;
+  border-radius: 5px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+
+  & .hide {
+    display: none !important;
   }
+
+  & #manual-instructions {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    & .manual-btn {
+      margin: 8px 0; 
+    }
+  }
+
+  & #script-instructions {
+    margin: auto;
+    height: 60%;
+    width: 70%;
+    
+    & textarea {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      height: 100%;
+      width: 100%;
+      resize: none;
+    }
+
+    & .script-btn {
+      position: relative;
+      top: -20px;
+      left: 60px;
+    }
+  }
+
 }
 
 .btn {
@@ -74,15 +124,21 @@
   border: none;
   border-radius: 2px;
   padding: 8px;
-  min-width: 80px;
-  text-transform: uppercase;
+  min-width: 100px;
+  font-weight: 600;
   cursor: pointer;
 
-  &.btn-action {
-    background-color: #f4f4f4;
+  background-color: #eee;
+  box-shadow: 0 2px #ccc;
+  border-radius: .5em;
+  transition: background-color .3s, box-shadow .3s;
 
-    &:hover {
-      background-color: #eee;
-    }
+  &.btn-action:hover {
+    background-color: lightgreen;
+    box-shadow: 0 2px rgb(107, 184, 107);
+  }
+  &.btn-valid:hover {
+    background-color: lightskyblue;
+    box-shadow: 0 2px rgb(108, 163, 197);
   }
 }
