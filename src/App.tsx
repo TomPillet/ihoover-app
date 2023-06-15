@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import './App.scss';
 
 import Canvas from './components/Canvas/Canvas';
@@ -41,7 +43,9 @@ function App() {
           <div className="instructions-wrapper">
             <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
               <textarea name="script" id="script"></textarea>
-              <button className='btn btn-valid script-btn' onClick={() => console.log('reload')}>Play</button>
+              <button className='btn btn-valid script-btn' onClick={() => console.log('reload')}>
+                <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
+              </button>
             </div>
 
             <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>

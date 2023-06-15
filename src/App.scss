@@ -108,12 +108,14 @@
       height: 100%;
       width: 100%;
       resize: none;
+      text-transform: uppercase;
     }
 
     & .script-btn {
       position: relative;
       top: -20px;
-      left: 60px;
+      left: 80px;
+      min-width: 60px;
     }
   }
 
@@ -134,11 +136,16 @@
   transition: background-color .3s, box-shadow .3s;
 
   &.btn-action:hover {
-    background-color: lightgreen;
-    box-shadow: 0 2px rgb(107, 184, 107);
+    background-color: #fdff88;
+    box-shadow: 0 2px #d9db6f;
   }
   &.btn-valid:hover {
-    background-color: lightskyblue;
-    box-shadow: 0 2px rgb(108, 163, 197);
+    background-color: rgb(161, 252, 161);
+    box-shadow: 0 2px rgb(107, 184, 107);
+  }
+
+  &:active {
+    transform: scale(.9);
+    transition: transform .1s;
   }
 }
