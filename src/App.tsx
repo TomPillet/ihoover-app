@@ -7,10 +7,19 @@ import Canvas from './components/Canvas/Canvas';
 import ToggleSwitcher from './components/ToggleSwitcher/ToggleSwitcher';
 
 function App() {
+  const [squaresX, setSquaresX] = useState(10);
+  const [squaresY, setSquaresY] = useState(10);
   const [useScript, setUseScript] = useState(false);
 
   const toggleScript = (toggleData: boolean) => {
     setUseScript(toggleData);
+  }
+
+  const updateSquaresX = (value: number | 0) => {
+    setSquaresX((value) ? value : 1);
+  }
+  const updateSquaresY = (value: number | 0) => {
+    setSquaresY((value) ? value : 1);
   }
 
   return (
@@ -18,17 +27,18 @@ function App() {
       
       <div className="grid-settings">
         <label htmlFor="grid-sizeX">Cases sur l'axe X
-          <input type="number" className="grid-param" id="grid-sizeX"/>
+          <input type="number" className="grid-param" id="grid-sizeX"
+            value={squaresX} onChange={(e) => updateSquaresX(parseInt(e.target.value))}/>
         </label>
         <label htmlFor="grid-sizeY">Cases sur l'axe Y
-          <input type="number" className="grid-param" id="grid-sizeY"/>
+          <input type="number" className="grid-param" id="grid-sizeY"
+            value={squaresY} onChange={(e) => updateSquaresY(parseInt(e.target.value))}/>
         </label>
-        <button className='btn btn-valid' onClick={() => console.log('reload')}>Reload</button>
       </div>
 
       <div className="grid-wrapper">
         <div className='grid-layout'>
-          <Canvas draw='' height={1000} width={1000} squaresX={10} squaresY={10}></Canvas>
+          <Canvas draw='' height={1000} width={1000} squaresX={squaresX} squaresY={squaresY}></Canvas>
         </div>
 
         <div className="grid-instructions">

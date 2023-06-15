@@ -10,6 +10,8 @@ interface CanvasProps {
 
 const Canvas = ({draw, height, width, squaresX, squaresY}: CanvasProps) => {
     const canvas = useRef<HTMLCanvasElement>(null);
+    const sizeSquareX:number = width / squaresX;
+    const sizeSquareY:number = height / squaresY;
 
     useEffect(() => {
         const context = canvas.current?.getContext('2d');
@@ -21,7 +23,16 @@ const Canvas = ({draw, height, width, squaresX, squaresY}: CanvasProps) => {
     });
 
     return ( 
-        <div></div>
+        <div>
+            {squaresX}
+            <br/>
+            {squaresY}
+            <br/>
+            {sizeSquareX}
+            
+            <br/>
+            {sizeSquareY}
+        </div>
     )
 }
 
