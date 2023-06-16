@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import './App.scss';
@@ -6,10 +6,31 @@ import './App.scss';
 import Canvas from './components/Canvas/Canvas';
 import ToggleSwitcher from './components/ToggleSwitcher/ToggleSwitcher';
 
+enum Cardinaux {
+  N = "N",
+  E = "E",
+  S = "S",
+  O = "O"
+}
+
+class EnumIndex {
+  static of<T extends object>(e: T) {
+    const values = Object.values(e);
+    return {
+      next: <K extends keyof T>(v: T[K]) => values[(values.indexOf(v)+1) % values.length],
+      prev: <K extends keyof T>(v: T[K]) => values[(values.indexOf(v) === 0) ? values.length-1 : values.indexOf(v)-1]
+    }
+  }
+}
+
 function App() {
   const [squaresX, setSquaresX] = useState(10);
   const [squaresY, setSquaresY] = useState(10);
   const [useScript, setUseScript] = useState(false);
+
+  const [hooverX, setHooverX] = useState(5);
+  const [hooverY, setHooverY] = useState(5);
+  const [hooverDir, setHooverDir] = useState(Cardinaux.N);
 
   const toggleScript = (toggleData: boolean) => {
     setUseScript(toggleData);
@@ -20,6 +41,31 @@ function App() {
   }
   const updateSquaresY = (value: number | 0) => {
     setSquaresY((value) ? value : 1);
+  }
+
+  const draw = (movement: any) => {
+    if (movement === "D") {
+      let nextDir = EnumIndex.of(Cardinaux).next(hooverDir);
+      setHooverDir(nextDir);
+    } else if (movement === "G") {
+      let prevDir = EnumIndex.of(Cardinaux).prev(hooverDir);
+      setHooverDir(prevDir);
+    } else if (movement === "A") {
+      switch (hooverDir) {
+        case Cardinaux.N:
+          setHooverY(hooverY+1);
+          break;
+        case Cardinaux.E:
+          setHooverX(hooverX+1);
+          break;
+        case Cardinaux.S:
+          setHooverY(hooverY-1);
+          break;
+        case Cardinaux.O:
+          setHooverX(hooverX-1);
+          break;
+      }
+    }
   }
 
   return (
@@ -38,7 +84,10 @@ function App() {
 
       <div className="grid-wrapper">
         <div className='grid-layout'>
-          <Canvas draw='' height={1000} width={1000} squaresX={squaresX} squaresY={squaresY}></Canvas>
+          {hooverX}
+          {hooverY}
+          {hooverDir}
+          <Canvas draw={draw} height={1000} width={1000}></Canvas>
         </div>
 
         <div className="grid-instructions">
@@ -59,9 +108,9 @@ function App() {
             </div>
 
             <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
-              <button className="btn btn-action manual-btn" onClick={() => console.log('droite')}>Droite</button>
-              <button className="btn btn-action manual-btn" onClick={() => console.log('gauche')}>Gauche</button>
-              <button className="btn btn-action manual-btn" onClick={() => console.log('avancer')}>Avant</button>
+              <button className="btn btn-action manual-btn" onClick={() => draw("D")}>Droite</button>
+              <button className="btn btn-action manual-btn" onClick={() => draw("G")}>Gauche</button>
+              <button className="btn btn-action manual-btn" onClick={() => draw("A")}>Avant</button>
             </div>
           </div>
 
