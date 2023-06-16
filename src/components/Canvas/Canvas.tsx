@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
+import './Canvas.scss';
 
 interface CanvasProps {
     draw: any,
     height: number,
     width: number,
+    squareSize: number
 }
 
-const Canvas = ({draw, height, width}: CanvasProps) => {
+const Canvas = ({draw, height, width, squareSize}: CanvasProps) => {
 
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
@@ -19,7 +21,9 @@ const Canvas = ({draw, height, width}: CanvasProps) => {
     });
 
     return ( 
-        <div>
+        <div className="canvas-wrapper">
+            <canvas ref={canvas} height={height} width={width}>        
+            </canvas>
         </div>
     )
 }

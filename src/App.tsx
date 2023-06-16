@@ -24,6 +24,7 @@ class EnumIndex {
 }
 
 function App() {
+  const squareSize = 100;
   const [squaresX, setSquaresX] = useState(10);
   const [squaresY, setSquaresY] = useState(10);
   const [useScript, setUseScript] = useState(false);
@@ -31,6 +32,9 @@ function App() {
   const [hooverX, setHooverX] = useState(5);
   const [hooverY, setHooverY] = useState(5);
   const [hooverDir, setHooverDir] = useState(Cardinaux.N);
+
+  const canvasHeight = squareSize*squaresY;
+  const canvasWidth = squareSize*squaresX;
 
   const toggleScript = (toggleData: boolean) => {
     setUseScript(toggleData);
@@ -43,7 +47,32 @@ function App() {
     setSquaresY((value) ? value : 1);
   }
 
-  const draw = (movement: any) => {
+  const draw = (context: any) => {
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+    context = drawGrid(context);
+  }
+  
+  const drawGrid = (context: any) => {
+    context.beginPath();
+    for (let x=0; x<=squaresX; x++) {
+      console.log(x);
+      context.moveTo(x*squareSize, 0);
+      context.lineTo(x*squareSize, canvasHeight);
+    }
+
+    for (let y=0; y<=squaresY; y++) {
+      context.moveTo(0, y*squareSize);
+      context.lineTo(canvasWidth, y*squareSize);
+    }
+
+    context.strokeStyle = 'rgb(0,0,0)';
+    context.lineWidth = 1;
+    context.stroke();
+
+    return context;
+  }
+
+  const updateHoover = (movement: any) => {
     if (movement === "D") {
       let nextDir = EnumIndex.of(Cardinaux).next(hooverDir);
       setHooverDir(nextDir);
@@ -84,10 +113,7 @@ function App() {
 
       <div className="grid-wrapper">
         <div className='grid-layout'>
-          {hooverX}
-          {hooverY}
-          {hooverDir}
-          <Canvas draw={draw} height={1000} width={1000}></Canvas>
+          <Canvas draw={draw} height={canvasHeight} width={canvasWidth} squareSize={squareSize}></Canvas>
         </div>
 
         <div className="grid-instructions">
@@ -108,9 +134,9 @@ function App() {
             </div>
 
             <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
-              <button className="btn btn-action manual-btn" onClick={() => draw("D")}>Droite</button>
-              <button className="btn btn-action manual-btn" onClick={() => draw("G")}>Gauche</button>
-              <button className="btn btn-action manual-btn" onClick={() => draw("A")}>Avant</button>
+              <button className="btn btn-action manual-btn" onClick={() => updateHoover("D")}>Droite</button>
+              <button className="btn btn-action manual-btn" onClick={() => updateHoover("G")}>Gauche</button>
+              <button className="btn btn-action manual-btn" onClick={() => updateHoover("A")}>Avant</button>
             </div>
           </div>
 
