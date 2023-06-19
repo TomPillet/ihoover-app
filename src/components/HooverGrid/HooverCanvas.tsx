@@ -35,16 +35,13 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const [hooverX, setHooverX] = useState(5);
     const [hooverY, setHooverY] = useState(5);
     const [hooverDir, setHooverDir] = useState(Cardinaux.N);
-  
     const hooverHeight: number = Math.floor(squareSize/3);
     const hooverWidth: number = Math.floor(squareSize/3);
-    const hooverLeftMargin = (squareSize - hooverWidth)/2;
-    const hooverTopMargin = (squareSize - hooverHeight)/2;
-  
-    const hooverSVG = `M ${hooverLeftMargin} ${hooverTopMargin + hooverHeight}
-                      H ${hooverLeftMargin + hooverWidth}
-                      L ${hooverLeftMargin + hooverWidth/2} ${hooverTopMargin}
-                      L ${hooverLeftMargin} ${hooverTopMargin + hooverHeight}`;
+    const hooverPixelsX = (hooverX-1)*squareSize;
+    const hooverPixelsY = (hooverY-1)*squareSize;
+
+    const squareLeftPadding = (squareSize - hooverWidth)/2;
+    const squareTopPadding = (squareSize - hooverHeight)/2;
   
     const canvasHeight = squareSize*squaresY;
     const canvasWidth = squareSize*squaresX;
@@ -59,10 +56,6 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         drawGrid(context);
         drawHoover(context);
     });
-  
-    const toggleScript = (toggleData: boolean) => {
-      setUseScript(toggleData);
-    }
 
     const drawGrid = (context: CanvasRenderingContext2D) => {
       context.beginPath();
@@ -86,15 +79,24 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const drawHoover = (context: CanvasRenderingContext2D) => {
         context.save();
 
+        const hooverSVG = ` M ${hooverPixelsX + squareLeftPadding} ${hooverPixelsY + squareTopPadding + hooverHeight}
+                            H ${hooverPixelsX + squareLeftPadding + hooverWidth}
+                            L ${hooverPixelsX + squareLeftPadding + (hooverWidth/2)} ${hooverPixelsY + squareTopPadding}
+                            L ${hooverPixelsX + squareLeftPadding} ${hooverPixelsY + squareTopPadding + hooverHeight}`;
+
         const path = new Path2D(hooverSVG);
-        const centerX = hooverLeftMargin+(hooverWidth/2);
-        const centerY = hooverTopMargin+(hooverHeight/2);
+        const centerX = hooverPixelsX + squareLeftPadding + (hooverWidth/2);
+        const centerY = hooverPixelsY + squareTopPadding + (hooverHeight/2);
 
         context.translate(centerX, centerY)
         context.rotate((Math.PI / 180) * getHooverRotation());
         context.translate(-centerX, -centerY);
         context.fillStyle = "red";
         context.fill(path);
+
+        context.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+        context.fillStyle = "blue";
+        context.fill();
       
         context?.restore();
     }
@@ -130,8 +132,10 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         else if (hooverDir === Cardinaux.O) { return 270 }
         return 0;
     }
-
-
+  
+    const toggleScript = (toggleData: boolean) => {
+      setUseScript(toggleData);
+    }
 
     return ( 
         <div className="grid-wrapper">
@@ -143,29 +147,28 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
             </div>
 
             <div className="grid-instructions">
-            <h3 className="instructions-header">Instructions :</h3>
-            
-            <div className="switch-mode">
-                <span className="mode">Manual</span>
-                <ToggleSwitcher toggler={() => toggleScript(!useScript)}></ToggleSwitcher>
-                <span className="mode">Script</span>
-            </div>
-
-            <div className="instructions-wrapper">
-                <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
-                <textarea name="script" id="script"></textarea>
-                <button className='btn btn-valid script-btn' onClick={() => console.log('reload')}>
-                    <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
-                </button>
+                <h3 className="instructions-header">Instructions :</h3>
+                
+                <div className="switch-mode">
+                    <span className="mode">Manual</span>
+                    <ToggleSwitcher toggler={() => toggleScript(!useScript)}></ToggleSwitcher>
+                    <span className="mode">Script</span>
                 </div>
 
-                <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
-                <button className="btn btn-action manual-btn" onClick={() => updateHoover("D")}>Droite</button>
-                <button className="btn btn-action manual-btn" onClick={() => updateHoover("G")}>Gauche</button>
-                <button className="btn btn-action manual-btn" onClick={() => updateHoover("A")}>Avant</button>
-                </div>
-            </div>
+                <div className="instructions-wrapper">
+                    <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
+                    <textarea name="script" id="script"></textarea>
+                    <button className='btn btn-valid script-btn' onClick={() => console.log('reload')}>
+                        <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
+                    </button>
+                    </div>
 
+                    <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
+                    <button className="btn btn-action manual-btn" onClick={() => updateHoover("D")}>Droite</button>
+                    <button className="btn btn-action manual-btn" onClick={() => updateHoover("G")}>Gauche</button>
+                    <button className="btn btn-action manual-btn" onClick={() => updateHoover("A")}>Avant</button>
+                    </div>
+                </div>
             </div>
         </div>
      );    
