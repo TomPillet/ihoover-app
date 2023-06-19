@@ -35,12 +35,16 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const [hooverX, setHooverX] = useState(5);
     const [hooverY, setHooverY] = useState(5);
     const [hooverDir, setHooverDir] = useState(Cardinaux.N);
-    const hooverHeight: number = Math.floor(squareSize/3);
-    const hooverWidth: number = Math.floor(squareSize/3);
-    const hooverPixelsX = (hooverX-1)*squareSize;
-    const hooverPixelsY = (hooverY-1)*squareSize;
+    const hooverWidth: number = 30;
+    // utilisation de pythagore pour la hauteur du triangle qui doit être équilatéral
+    const hooverHeight: number = hooverWidth * Math.sqrt(3) / 2;
+    const hooverCenterX: number = hooverWidth / 2;
+    const hooverCenterY: number = hooverHeight / 2;
+    const hooverOffsetX = (hooverX-1)*squareSize;
+    const hooverOffsetY = (hooverY-1)*squareSize;
 
-    const squareLeftPadding = (squareSize - hooverWidth)/2;
+    // définition de padding pour les squares de la grille car le triangle doit être au centre de ceux-ci
+    const squareLeftPadding = (squareSize - hooverWidth) / 2;
     const squareTopPadding = (squareSize - hooverHeight)/2;
   
     const canvasHeight = squareSize*squaresY;
@@ -58,72 +62,72 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     });
 
     const drawGrid = (context: CanvasRenderingContext2D) => {
-      context.beginPath();
-  
-      for (let x=0; x<=squaresX; x++) {
-        context.moveTo(x*squareSize, 0);
-        context.lineTo(x*squareSize, canvasHeight);
-      }
-      for (let y=0; y<=squaresY; y++) {
-        context.moveTo(0, y*squareSize);
-        context.lineTo(canvasWidth, y*squareSize);
-      }
-  
-      context.strokeStyle = 'rgb(0,0,0)';
-      context.lineWidth = 1;
-      context.stroke();
+        context.beginPath();
+    
+        for (let x=0; x<=squaresX; x++) {
+            context.moveTo(x*squareSize, 0);
+            context.lineTo(x*squareSize, canvasHeight);
+        }
+        for (let y=0; y<=squaresY; y++) {
+            context.moveTo(0, y*squareSize);
+            context.lineTo(canvasWidth, y*squareSize);
+        }
+    
+        context.strokeStyle = '#000';
+        context.lineWidth = 1;
+        context.stroke();
 
-      context.closePath();
+        context.closePath();
     }
 
     const drawHoover = (context: CanvasRenderingContext2D) => {
         context.save();
 
-        const hooverSVG = ` M ${hooverPixelsX + squareLeftPadding} ${hooverPixelsY + squareTopPadding + hooverHeight}
-                            H ${hooverPixelsX + squareLeftPadding + hooverWidth}
-                            L ${hooverPixelsX + squareLeftPadding + (hooverWidth/2)} ${hooverPixelsY + squareTopPadding}
-                            L ${hooverPixelsX + squareLeftPadding} ${hooverPixelsY + squareTopPadding + hooverHeight}`;
-
+        const hooverSVG = `M ${-hooverCenterX} ${hooverCenterY} H ${hooverCenterX} L 0 ${-hooverCenterY} Z`;
         const path = new Path2D(hooverSVG);
-        const centerX = hooverPixelsX + squareLeftPadding + (hooverWidth/2);
-        const centerY = hooverPixelsY + squareTopPadding + (hooverHeight/2);
 
-        context.translate(centerX, centerY)
+        const drawOffsetX = squareLeftPadding + hooverCenterX + hooverOffsetX;
+        const drawOffsetY = squareTopPadding + hooverCenterY + hooverOffsetY;
+
+        context.translate(drawOffsetX, drawOffsetY);
         context.rotate((Math.PI / 180) * getHooverRotation());
-        context.translate(-centerX, -centerY);
-        context.fillStyle = "red";
+
+        context.strokeStyle = "#c26f4e";
+        context.lineWidth = 4;
+        context.stroke(path);
+        context.fillStyle = "#ffa07a";
         context.fill(path);
 
-        context.arc(centerX, centerY, 5, 0, 2 * Math.PI);
-        context.fillStyle = "blue";
+        context.arc(0, -hooverCenterY, 3, 0, 2*Math.PI);
+        context.fillStyle = "#c26f4e";
         context.fill();
       
-        context?.restore();
+        context.restore();
     }
   
     const updateHoover = (movement: any) => {
-      if (movement === "D") {
-        let nextDir = EnumIndex.of(Cardinaux).next(hooverDir);
-        setHooverDir(nextDir);
-      } else if (movement === "G") {
-        let prevDir = EnumIndex.of(Cardinaux).prev(hooverDir);
-        setHooverDir(prevDir);
-      } else if (movement === "A") {
-        switch (hooverDir) {
-          case Cardinaux.N:
-            if (hooverY > 1) { setHooverY(hooverY-1) }
-            break;
-          case Cardinaux.E:
-            if (hooverX < squaresX) { setHooverX(hooverX+1) }
-            break;
-          case Cardinaux.S:
-            if (hooverY < squaresY) { setHooverY(hooverY+1) }
-            break;
-          case Cardinaux.O:
-            if (hooverX > 1) { setHooverX(hooverX-1) }
-            break;
+        if (movement === "D") {
+            let nextDir = EnumIndex.of(Cardinaux).next(hooverDir);
+            setHooverDir(nextDir);
+        } else if (movement === "G") {
+            let prevDir = EnumIndex.of(Cardinaux).prev(hooverDir);
+            setHooverDir(prevDir);
+        } else if (movement === "A") {
+            switch (hooverDir) {
+            case Cardinaux.N:
+                if (hooverY > 1) { setHooverY(hooverY-1) }
+                break;
+            case Cardinaux.E:
+                if (hooverX < squaresX) { setHooverX(hooverX+1) }
+                break;
+            case Cardinaux.S:
+                if (hooverY < squaresY) { setHooverY(hooverY+1) }
+                break;
+            case Cardinaux.O:
+                if (hooverX > 1) { setHooverX(hooverX-1) }
+                break;
+            }
         }
-      }
     }
 
     const getHooverRotation = (): number => {
@@ -133,8 +137,8 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         return 0;
     }
   
-    const toggleScript = (toggleData: boolean) => {
-      setUseScript(toggleData);
+    const toggleScript = () => {
+      setUseScript(!useScript);
     }
 
     return ( 
@@ -151,7 +155,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                 
                 <div className="switch-mode">
                     <span className="mode">Manual</span>
-                    <ToggleSwitcher toggler={() => toggleScript(!useScript)}></ToggleSwitcher>
+                    <ToggleSwitcher toggler={() => toggleScript()}></ToggleSwitcher>
                     <span className="mode">Script</span>
                 </div>
 
