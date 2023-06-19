@@ -111,16 +111,16 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
       } else if (movement === "A") {
         switch (hooverDir) {
           case Cardinaux.N:
-            setHooverY(hooverY-1);
+            if (hooverY > 1) { setHooverY(hooverY-1) }
             break;
           case Cardinaux.E:
-            setHooverX(hooverX+1);
+            if (hooverX < squaresX) { setHooverX(hooverX+1) }
             break;
           case Cardinaux.S:
-            setHooverY(hooverY+1);
+            if (hooverY < squaresY) { setHooverY(hooverY+1) }
             break;
           case Cardinaux.O:
-            setHooverX(hooverX-1);
+            if (hooverX > 1) { setHooverX(hooverX-1) }
             break;
         }
       }
