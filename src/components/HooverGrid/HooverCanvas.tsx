@@ -1,10 +1,11 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, TextareaHTMLAttributes, useEffect, useRef, useState } from 'react';
 import './HooverCanvas.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
+import { cpSync } from 'fs';
 
 interface HooverCanvasProps {
     squaresX: number,
@@ -31,6 +32,9 @@ class EnumIndex {
 const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => { 
     const squareSize: number = 100;
     const [useScript, setUseScript] = useState(false);
+    const [scriptContent, setScriptContent] = useState('');
+    const [launchScript, setLaunchScript] = useState(false);
+    const [scriptIteration, setScriptIteration] = useState(0);
 
     const [hooverX, setHooverX] = useState(5);
     const [hooverY, setHooverY] = useState(5);
@@ -55,11 +59,31 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         const context = canvas.current?.getContext('2d');
   
         if (!context) { return; }
-        
+
+        if (launchScript) {
+            setTimeout(() => {
+                updateHoover(scriptContent.charAt(scriptIteration))
+                draw(context);
+
+                const nextIteration = scriptIteration+1;
+                setScriptIteration(nextIteration);
+
+                if (scriptIteration === scriptContent.length) {
+                    setLaunchScript(false);
+                    setScriptIteration(0);
+                }
+            }, 360);
+        } else {
+            draw(context);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [launchScript, hooverDir, hooverX, hooverY]);
+
+    const draw = (context: CanvasRenderingContext2D) => {
         context.clearRect(0, 0, canvasWidth, canvasHeight)
         drawGrid(context);
         drawHoover(context);
-    });
+    }
 
     const drawGrid = (context: CanvasRenderingContext2D) => {
         context.beginPath();
@@ -105,27 +129,29 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         context.restore();
     }
   
-    const updateHoover = (movement: any) => {
-        if (movement === "D") {
+    const updateHoover = (movement: string) => {
+        movement.toLowerCase();
+
+        if (movement === "d") {
             let nextDir = EnumIndex.of(Cardinaux).next(hooverDir);
             setHooverDir(nextDir);
-        } else if (movement === "G") {
+        } else if (movement === "g") {
             let prevDir = EnumIndex.of(Cardinaux).prev(hooverDir);
             setHooverDir(prevDir);
-        } else if (movement === "A") {
-            switch (hooverDir) {
-            case Cardinaux.N:
-                if (hooverY > 1) { setHooverY(hooverY-1) }
-                break;
-            case Cardinaux.E:
-                if (hooverX < squaresX) { setHooverX(hooverX+1) }
-                break;
-            case Cardinaux.S:
-                if (hooverY < squaresY) { setHooverY(hooverY+1) }
-                break;
-            case Cardinaux.O:
-                if (hooverX > 1) { setHooverX(hooverX-1) }
-                break;
+        } else if (movement === "a") {
+            switch (hooverDir) {           
+                case Cardinaux.N:
+                    if (hooverY > 1) { setHooverY(hooverY-1) }
+                    break;
+                case Cardinaux.E:
+                    if (hooverX < squaresX) { setHooverX(hooverX+1) }
+                    break;
+                case Cardinaux.S:
+                    if (hooverY < squaresY) { setHooverY(hooverY+1) }
+                    break;
+                case Cardinaux.O:
+                    if (hooverX > 1) { setHooverX(hooverX-1) }
+                    break;
             }
         }
     }
@@ -138,7 +164,17 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     }
   
     const toggleScript = () => {
-      setUseScript(!useScript);
+        setUseScript(!useScript);
+    }
+
+    const updateScript = (value: string) => {
+        let lastChar = value.slice(-1).toLowerCase();
+        if (!(lastChar === "a" || lastChar === "d" || lastChar === "g" || !lastChar)) { return; }
+        setScriptContent(value.toLowerCase());
+    }
+
+    const playScript = () => {
+        setLaunchScript(true);
     }
 
     return ( 
@@ -161,16 +197,18 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
                 <div className="instructions-wrapper">
                     <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
-                    <textarea name="script" id="script"></textarea>
-                    <button className='btn btn-valid script-btn' onClick={() => console.log('reload')}>
-                        <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
-                    </button>
+                        <textarea name="script" id="script"
+                            value={scriptContent}
+                            onChange={(e) => updateScript(e.target.value)} />
+                        <button className='btn btn-valid script-btn' onClick={() => playScript()}>
+                            <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
+                        </button>
                     </div>
 
                     <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
-                    <button className="btn btn-action manual-btn" onClick={() => updateHoover("D")}>Droite</button>
-                    <button className="btn btn-action manual-btn" onClick={() => updateHoover("G")}>Gauche</button>
-                    <button className="btn btn-action manual-btn" onClick={() => updateHoover("A")}>Avant</button>
+                        <button className="btn btn-action manual-btn" onClick={() => updateHoover("d")}>Droite</button>
+                        <button className="btn btn-action manual-btn" onClick={() => updateHoover("g")}>Gauche</button>
+                        <button className="btn btn-action manual-btn" onClick={() => updateHoover("a")}>Avant</button>
                     </div>
                 </div>
             </div>
