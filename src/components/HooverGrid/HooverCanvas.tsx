@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
+import LoaderSVG from '../LoaderSVG/LoaderSVG';
 
 interface HooverCanvasProps {
     squaresX: number,
@@ -71,10 +72,12 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                 setScriptIteration(nextIteration);
 
                 if (scriptIteration === scriptContent.length) {
-                    setLaunchScript(false);
-                    setScriptIteration(0);
+                    setTimeout(() => {
+                        setLaunchScript(false);
+                        setScriptIteration(0);
+                    }, 500);    
                 }
-            }, 360);
+            }, 350);
         } else {
             draw(context);
         }
@@ -188,29 +191,41 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                 </div>
             </div>
 
-            <div className="grid-instructions">
-                <h3 className="instructions-header">Instructions :</h3>
-                
-                <div className="switch-mode">
-                    <span className="mode">Manual</span>
-                    <ToggleSwitcher toggler={() => toggleScript()}></ToggleSwitcher>
-                    <span className="mode">Script</span>
+            <div className="grid-data">
+                <div className="hoover-data">
+                    <h3 className="hoover-data-header">Hoover data :</h3>
+                    <div className="hoover-coords">
+                        <span>X : {hooverX}</span>
+                        <span>Y : {hooverY}</span>
+                        <span>Direction : {hooverDir}</span>
+                    </div>
                 </div>
 
-                <div className="instructions-wrapper">
-                    <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
-                        <textarea name="script" id="script"
-                            value={scriptContent}
-                            onChange={(e) => updateScript(e.target.value)} />
-                        <button className='btn btn-valid script-btn' onClick={() => playScript()}>
-                            <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
-                        </button>
+                <div className="grid-instructions">
+                    <h3 className="instructions-header">Instructions :</h3>
+                    
+                    <div className="switch-mode">
+                        <span className="mode">Manual</span>
+                        <ToggleSwitcher toggler={() => toggleScript()}></ToggleSwitcher>
+                        <span className="mode">Script</span>
                     </div>
 
-                    <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
-                        <button className="btn btn-action manual-btn" onClick={() => updateHoover("d")}>Droite</button>
-                        <button className="btn btn-action manual-btn" onClick={() => updateHoover("g")}>Gauche</button>
-                        <button className="btn btn-action manual-btn" onClick={() => updateHoover("a")}>Avant</button>
+                    <div className="instructions-wrapper">
+                        <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
+                            <textarea name="script" id="script"
+                                value={scriptContent}
+                                onChange={(e) => updateScript(e.target.value)} />
+                            <button className='btn btn-valid script-btn' onClick={() => playScript()}>
+                                <FontAwesomeIcon style={{display: (launchScript) ? 'none' : 'inline-block'}} icon={faPlay}></FontAwesomeIcon>
+                                <LoaderSVG display={(launchScript) ? 'inline-block' : 'none'}></LoaderSVG>
+                            </button>
+                        </div>
+
+                        <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
+                            <button className="btn btn-action manual-btn" onClick={() => updateHoover("d")}>Droite</button>
+                            <button className="btn btn-action manual-btn" onClick={() => updateHoover("g")}>Gauche</button>
+                            <button className="btn btn-action manual-btn" onClick={() => updateHoover("a")}>Avant</button>
+                        </div>
                     </div>
                 </div>
             </div>

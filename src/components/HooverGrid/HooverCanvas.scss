@@ -11,7 +11,6 @@
 .grid-wrapper {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     height: 70vh;
     width: calc(100vw - 16px*2);
     margin: 16px;
@@ -20,23 +19,49 @@
 .grid-layout {
     display: flex;
     height: calc(100% - 16px*2);
-    width: calc(60% - 16px*2);
+    max-width: 70%;
     padding: 16px;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.grid-data {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - (16px*2));
+  width: 270px;
+  margin-left: 32px;
+  padding: 16px;
+}
+
+.hoover-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 16%;
+  margin-bottom: 4%;
+
+  .hoover-coords {
+    display: flex;
+
+    span {
+      display: block;
+      margin: 0 16px;
+    }
+  }
+}
+
+.hoover-data-header, .instructions-header {
+  margin: 0;
 }
 
 .grid-instructions {
   display: flex;
   flex-direction: column;
+  height: 80%;
+  width: 100%;
   margin: auto;
-  padding: 16px;
-  height: calc(100% - (16px*2));
-  width: 36%;
   text-align: center;
-
-  .instructions-header {
-    margin: 0;
-  }
 
   & .switch-mode {
     display: flex;
@@ -56,7 +81,7 @@
   align-items: center;
   justify-content: center;
   height: 50%;
-  width: 60%;
+  width: 100%;
   margin: auto;
   border-radius: 5px;
   box-shadow: 0 0 15px rgba(0,0,0,0.1);
@@ -94,6 +119,7 @@
       position: relative;
       top: -20px;
       left: 80px;
+      height: 40px;
       min-width: 60px;
     }
   }
