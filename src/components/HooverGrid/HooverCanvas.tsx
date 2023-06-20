@@ -65,18 +65,17 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
         if (launchScript) {
             setTimeout(() => {
-                updateHoover(scriptContent.charAt(scriptIteration))
+                if (updateHoover(scriptContent.charAt(scriptIteration))) {
+                    stopScript();
+                    return;
+                }
+
                 draw(context);
 
                 const nextIteration = scriptIteration+1;
                 setScriptIteration(nextIteration);
 
-                if (scriptIteration === scriptContent.length) {
-                    setTimeout(() => {
-                        setLaunchScript(false);
-                        setScriptIteration(0);
-                    }, 500);    
-                }
+                if (scriptIteration === scriptContent.length) { stopScript() }
             }, 350);
         } else {
             draw(context);
@@ -134,7 +133,8 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         context.restore();
     }
   
-    const updateHoover = (movement: string) => {
+    // Doit return true si le hoover ne peut pas avancer car se situe au bord de la grille
+    const updateHoover = (movement: string): boolean => {
         movement.toLowerCase();
 
         if (movement === "d") {
@@ -146,19 +146,33 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         } else if (movement === "a") {
             switch (hooverDir) {           
                 case Cardinaux.N:
-                    if (hooverY > 0) { setHooverY(hooverY-1) }
-                    break;
+                    if (hooverY > 0) { 
+                        setHooverY(hooverY-1);
+                        break;
+                    }
+                    return true;
                 case Cardinaux.E:
-                    if (hooverX < squaresX-1) { setHooverX(hooverX+1) }
-                    break;
+                    if (hooverX < squaresX-1) {
+                        setHooverX(hooverX+1); 
+                        break;
+                    }
+                    return true;
                 case Cardinaux.S:
-                    if (hooverY < squaresY-1) { setHooverY(hooverY+1) }
-                    break;
+                    if (hooverY < squaresY-1) {
+                        setHooverY(hooverY+1);
+                        break;
+                    }
+                    return true;
                 case Cardinaux.O:
-                    if (hooverX > 0) { setHooverX(hooverX-1) }
-                    break;
+                    if (hooverX > 0) {
+                        setHooverX(hooverX-1);
+                        break;
+                    }
+                    return true;
             }
         }
+
+        return false;
     }
 
     const getHooverRotation = (): number => {
@@ -180,6 +194,12 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
     const playScript = () => {
         setLaunchScript(true);
+    }
+    const stopScript = () => {
+        setTimeout(() => {
+            setLaunchScript(false);
+            setScriptIteration(0);
+        }, 500);    
     }
 
     return ( 
