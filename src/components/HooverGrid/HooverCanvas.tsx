@@ -55,6 +55,9 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
   
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
+        if (hooverX > squaresX-1) { setHooverX(squaresX-1); }
+        if (hooverY > squaresY-1) { setHooverY(squaresY-1); }
+
         const context = canvas.current?.getContext('2d');
   
         if (!context) { return; }
@@ -76,7 +79,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
             draw(context);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [launchScript, hooverDir, hooverX, hooverY]);
+    }, [launchScript, hooverDir, hooverX, hooverY, canvasHeight, canvasWidth]);
 
     const draw = (context: CanvasRenderingContext2D) => {
         context.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -140,16 +143,16 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         } else if (movement === "a") {
             switch (hooverDir) {           
                 case Cardinaux.N:
-                    if (hooverY > 1) { setHooverY(hooverY-1) }
+                    if (hooverY > 0) { setHooverY(hooverY-1) }
                     break;
                 case Cardinaux.E:
-                    if (hooverX < squaresX) { setHooverX(hooverX+1) }
+                    if (hooverX < squaresX-1) { setHooverX(hooverX+1) }
                     break;
                 case Cardinaux.S:
-                    if (hooverY < squaresY) { setHooverY(hooverY+1) }
+                    if (hooverY < squaresY-1) { setHooverY(hooverY+1) }
                     break;
                 case Cardinaux.O:
-                    if (hooverX > 1) { setHooverX(hooverX-1) }
+                    if (hooverX > 0) { setHooverX(hooverX-1) }
                     break;
             }
         }
