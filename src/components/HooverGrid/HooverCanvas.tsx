@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
-import { cpSync } from 'fs';
 
 interface HooverCanvasProps {
     squaresX: number,
@@ -44,8 +43,8 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const hooverHeight: number = hooverWidth * Math.sqrt(3) / 2;
     const hooverCenterX: number = hooverWidth / 2;
     const hooverCenterY: number = hooverHeight / 2;
-    const hooverOffsetX = (hooverX-1)*squareSize;
-    const hooverOffsetY = (hooverY-1)*squareSize;
+    const hooverOffsetX = hooverX*squareSize;
+    const hooverOffsetY = hooverY*squareSize;
 
     // définition de padding pour les squares de la grille car le triangle doit être au centre de ceux-ci
     const squareLeftPadding = (squareSize - hooverWidth) / 2;

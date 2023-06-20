@@ -4,8 +4,8 @@ import './App.scss';
 import HooverCanvas from './components/HooverGrid/HooverCanvas';
 
 function App() {
-  const [squaresX, setSquaresX] = useState(10);
-  const [squaresY, setSquaresY] = useState(10);
+  const [squaresX, setSquaresX] = useState(11);
+  const [squaresY, setSquaresY] = useState(11);
 
   const updateSquaresX = (value: number | 0) => {
     setSquaresX((value) ? value : 1);
