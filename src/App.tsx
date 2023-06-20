@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import './App.scss';
 
 import HooverCanvas from './components/HooverGrid/HooverCanvas';

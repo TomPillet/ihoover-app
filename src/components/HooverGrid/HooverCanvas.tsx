@@ -1,4 +1,4 @@
-import React, { FC, TextareaHTMLAttributes, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import './HooverCanvas.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
