@@ -53,6 +53,15 @@
   .hoover-move-to-inner {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 140px;
+
+    .move-to-btn {
+      margin-top: 8px;
+      height: 36px;
+      width: 80px;
+    }
   }
 
   div, .hoover-data-header {
@@ -104,6 +113,7 @@
     align-items: center;
 
     & .manual-btn {
+      width: 100px;
       margin: 8px 0; 
     }
   }
@@ -125,9 +135,9 @@
     & .script-btn {
       position: relative;
       top: -20px;
-      left: 80px;
+      left: 152px;
       height: 40px;
-      min-width: 60px;
+      width: 60px;
     }
   }
 }

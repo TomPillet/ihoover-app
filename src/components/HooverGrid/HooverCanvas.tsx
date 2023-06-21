@@ -1,11 +1,9 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import './HooverCanvas.scss';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
-
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
-import LoaderSVG from '../LoaderSVG/LoaderSVG';
+import PlayButton from '../PlayButton/PlayButton';
+import { cp } from 'fs';
 
 interface HooverCanvasProps {
     squaresX: number,
@@ -31,6 +29,9 @@ class EnumIndex {
  
 const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => { 
     const squareSize: number = 100;
+    const canvasHeight = squareSize*squaresY;
+    const canvasWidth = squareSize*squaresX;
+
     const [useScript, setUseScript] = useState(false);
     const [scriptContent, setScriptContent] = useState('');
     const [launchScript, setLaunchScript] = useState(false);
@@ -39,6 +40,11 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const [hooverX, setHooverX] = useState(5);
     const [hooverY, setHooverY] = useState(5);
     const [hooverDir, setHooverDir] = useState(Cardinaux.N);
+    const [moveToX, setMoveToX] = useState(hooverX);
+    const [moveToY, setMoveToY] = useState(hooverY);
+    const [launchMoveTo, setLaunchMoveTo] = useState(false);
+    const movementDelay = 350;
+
     const hooverWidth: number = 30;
     // utilisation de pythagore pour la hauteur du triangle qui doit être équilatéral
     const hooverHeight: number = hooverWidth * Math.sqrt(3) / 2;
@@ -51,22 +57,19 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const squareLeftPadding = (squareSize - hooverWidth) / 2;
     const squareTopPadding = (squareSize - hooverHeight)/2;
   
-    const canvasHeight = squareSize*squaresY;
-    const canvasWidth = squareSize*squaresX;
-  
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         if (hooverX > squaresX-1) { setHooverX(squaresX-1); }
         if (hooverY > squaresY-1) { setHooverY(squaresY-1); }
 
         const context = canvas.current?.getContext('2d');
-  
+
         if (!context) { return; }
 
         if (launchScript) {
             setTimeout(() => {
                 if (updateHoover(scriptContent.charAt(scriptIteration))) {
-                    stopScript();
+                    stopProcesses();
                     return;
                 }
 
@@ -75,13 +78,68 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                 const nextIteration = scriptIteration+1;
                 setScriptIteration(nextIteration);
 
-                if (scriptIteration === scriptContent.length) { stopScript() }
-            }, 350);
-        } else {
+                if (scriptIteration === scriptContent.length) { stopProcesses() }
+            }, movementDelay);
+        }
+        else if (launchMoveTo) {
+            setTimeout(() => {
+                if (moveToX !== hooverX) {
+                    if (hooverX > moveToX) {
+                        // Doit aller sur la gauche
+                        if (hooverDir !== Cardinaux.O) {
+                            // Si mauvaise direction :
+                            // Tourner à droite, sauf si déjà dirigé vers le haut donc tourner à gauche
+                            updateHoover((hooverDir === Cardinaux.N) ? 'g' : 'd');
+                        } else { 
+                            // Si bonne direction, avancer sur la gauche
+                            setHooverX(hooverX-1);
+                        }
+                    } else {
+                        // Doit aller sur la droite
+                        if (hooverDir !== Cardinaux.E) {
+                            // Si mauvaise direction :
+                            // Tourner à droite, sauf si déjà dirigé vers le bas donc tourner à gauche
+                            updateHoover((hooverDir === Cardinaux.S) ? 'g' : 'd');
+                        } else { 
+                            // Si bonne direction, avancer sur la gauche
+                            setHooverX(hooverX+1);
+                        }
+                    }
+                }
+                else if (moveToY !== hooverY) {
+                    if (hooverY > moveToY) {
+                        // Doit aller vers le haut
+                        if (hooverDir !== Cardinaux.N) {
+                            // Si mauvaise direciton :
+                            // Tourner à droite, sauf si déjà dirigé vers la droite donc tourner à gauche
+                            updateHoover((hooverDir === Cardinaux.E) ? 'g' : 'd');
+                        } else {
+                            // Si bonne direction, avancer vers le haut
+                            setHooverY(hooverY-1);
+                        }
+                    } else {
+                        // Doit aller vers le bas
+                        if (hooverDir !== Cardinaux.S) {
+                            // Si mauvaise direciton :
+                            // Tourner à droite, sauf si déjà dirigé vers la gauche donc tourner à gauche
+                            updateHoover((hooverDir === Cardinaux.O) ? 'g' : 'd');
+                        } else {
+                            // Si bonne direction, avancer vers le bas
+                            setHooverY(hooverY+1);
+                        }
+                    }
+                }
+
+                draw(context);
+
+                if (moveToX === hooverX && moveToY === hooverY) { stopProcesses(); }
+            }, movementDelay)
+        }
+        else {
             draw(context);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [launchScript, hooverDir, hooverX, hooverY, canvasHeight, canvasWidth]);
+    }, [launchScript, launchMoveTo, hooverDir, hooverX, hooverY, canvasHeight, canvasWidth]);
 
     const draw = (context: CanvasRenderingContext2D) => {
         context.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -181,22 +239,33 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         else if (hooverDir === Cardinaux.O) { return 270 }
         return 0;
     }
+
+    const playMoveTo = () => {
+        if (launchScript) { return; }
+        setLaunchMoveTo(true);
+    }
+    const updateMoveToX = (x: number) => {
+        setMoveToX((x) ? x : 0);
+    }
+    const updateMoveToY = (y: number) => {
+        setMoveToY((y) ? y : 0);
+    }
   
     const toggleScript = () => {
         setUseScript(!useScript);
     }
-
     const updateScript = (value: string) => {
         let lastChar = value.slice(-1).toLowerCase();
         if (!(lastChar === "a" || lastChar === "d" || lastChar === "g" || !lastChar)) { return; }
         setScriptContent(value.toLowerCase());
     }
-
     const playScript = () => {
+        if (launchMoveTo) { return; }
         setLaunchScript(true);
     }
-    const stopScript = () => {
+    const stopProcesses = () => {
         setTimeout(() => {
+            setLaunchMoveTo(false);
             setLaunchScript(false);
             setScriptIteration(0);
         }, 500);    
@@ -221,11 +290,16 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                     </div>
                     <div className="hoover-move-to-inner">
                         <label htmlFor="move-toX">Move to X :
-                            <input type="number" className="input-number hoover-move-to" id="move-toX"/>
+                            <input min="0" max={squaresX-1} type="number" className="input-number hoover-move-to" id="move-toX" disabled={launchMoveTo}
+                                value={moveToX} onChange={(e) => updateMoveToX(parseInt(e.target.value))}/>
                         </label>
                         <label htmlFor="move-toY">Move to Y :
-                            <input type="number" className="input-number hoover-move-to" id="move-toY"/>
+                            <input min="0" max={squaresY-1} type="number" className="input-number hoover-move-to" id="move-toY" disabled={launchMoveTo}
+                                value={moveToY} onChange={(e) => updateMoveToY(parseInt(e.target.value))}/>
                         </label>
+                        <div className="move-to-btn">
+                            <PlayButton loading={launchMoveTo} onClick={() => playMoveTo()}></PlayButton>
+                        </div>
                     </div>
                 </div>
 
@@ -240,13 +314,12 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
                     <div className="instructions-wrapper">
                         <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
-                            <textarea name="script" id="script"
+                            <textarea name="script" id="script" disabled={launchScript}
                                 value={scriptContent}
                                 onChange={(e) => updateScript(e.target.value)} />
-                            <button className='btn btn-valid script-btn' onClick={() => playScript()}>
-                                <FontAwesomeIcon style={{display: (launchScript) ? 'none' : 'inline-block'}} icon={faPlay}></FontAwesomeIcon>
-                                <LoaderSVG display={(launchScript) ? 'inline-block' : 'none'}></LoaderSVG>
-                            </button>
+                            <div className="script-btn">
+                                <PlayButton loading={launchScript} onClick={() => playScript()}></PlayButton>
+                            </div>
                         </div>
 
                         <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>

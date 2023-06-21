@@ -11,7 +11,7 @@
   border: none;
   border-radius: 2px;
   padding: 8px;
-  min-width: 100px;
+  width: 100%;
   font-weight: 600;
   cursor: pointer;
 
@@ -23,10 +23,6 @@
   &.btn-action:hover {
     background-color: #fdff88;
     box-shadow: 0 2px #d9db6f;
-  }
-  &.btn-valid:hover {
-    background-color: rgb(161, 252, 161);
-    box-shadow: 0 2px rgb(107, 184, 107);
   }
 
   &:active {

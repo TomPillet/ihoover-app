@@ -1,0 +1,10 @@
+
+.btn-valid {
+    display: block;
+    height: 100%;
+
+    &:hover {
+        background-color: rgb(161, 252, 161);
+        box-shadow: 0 2px rgb(107, 184, 107);
+    }
+}

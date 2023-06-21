@@ -7,10 +7,10 @@ function App() {
   const [squaresX, setSquaresX] = useState(10);
   const [squaresY, setSquaresY] = useState(10);
 
-  const updateSquaresX = (value: number | 0) => {
+  const updateSquaresX = (value: number) => {
     setSquaresX((value) ? value : 1);
   }
-  const updateSquaresY = (value: number | 0) => {
+  const updateSquaresY = (value: number) => {
     setSquaresY((value) ? value : 1);
   }
 
@@ -19,11 +19,11 @@ function App() {
       
       <div className="grid-settings">
         <label htmlFor="grid-sizeX">Cases sur l'axe X
-          <input type="number" className="input-number grid-param" id="grid-sizeX"
+          <input min="1" type="number" className="input-number grid-param" id="grid-sizeX"
             value={squaresX} onChange={(e) => updateSquaresX(parseInt(e.target.value))}/>
         </label>
         <label htmlFor="grid-sizeY">Cases sur l'axe Y
-          <input type="number" className="input-number grid-param" id="grid-sizeY"
+          <input min="1" type="number" className="input-number grid-param" id="grid-sizeY"
             value={squaresY} onChange={(e) => updateSquaresY(parseInt(e.target.value))}/>
         </label>
       </div>
