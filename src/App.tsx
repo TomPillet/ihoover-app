@@ -19,11 +19,11 @@ function App() {
       
       <div className="grid-settings">
         <label htmlFor="grid-sizeX">Cases sur l'axe X
-          <input type="number" className="grid-param" id="grid-sizeX"
+          <input type="number" className="input-number grid-param" id="grid-sizeX"
             value={squaresX} onChange={(e) => updateSquaresX(parseInt(e.target.value))}/>
         </label>
         <label htmlFor="grid-sizeY">Cases sur l'axe Y
-          <input type="number" className="grid-param" id="grid-sizeY"
+          <input type="number" className="input-number grid-param" id="grid-sizeY"
             value={squaresY} onChange={(e) => updateSquaresY(parseInt(e.target.value))}/>
         </label>
       </div>

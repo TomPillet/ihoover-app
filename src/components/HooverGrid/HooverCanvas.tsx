@@ -219,6 +219,14 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                         <span>Y : {hooverY}</span>
                         <span>Direction : {hooverDir}</span>
                     </div>
+                    <div className="hoover-move-to-inner">
+                        <label htmlFor="move-toX">Move to X :
+                            <input type="number" className="input-number hoover-move-to" id="move-toX"/>
+                        </label>
+                        <label htmlFor="move-toY">Move to Y :
+                            <input type="number" className="input-number hoover-move-to" id="move-toY"/>
+                        </label>
+                    </div>
                 </div>
 
                 <div className="grid-instructions">
