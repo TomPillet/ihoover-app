@@ -199,8 +199,6 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         setMoveToY((y) ? y : 0);
     }
 
-    function toggleScript() {
-    }
     function updateScript (value: string) {
         let lastChar = value.slice(-1).toLowerCase();
         if (!(lastChar === "a" || lastChar === "d" || lastChar === "g" || !lastChar)) { return; }
