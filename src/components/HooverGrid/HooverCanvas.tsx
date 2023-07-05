@@ -48,21 +48,22 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
                     return;
                 }
 
-                draw(context);
                 setScriptIteration(scriptIteration+1);
+                draw(context);
             }, animationSpeed);
         }
-
         else if (launchMoveTo) {
             setTimeout(() => {
-                if (moveToX === hoover.x && moveToY === hoover.y) { resetProcesses(); return; }
+                if (moveToX === hoover.x && moveToY === hoover.y) {
+                    resetProcesses();
+                    return;
+                }
 
                 adjustHooverX();
                 adjustHooverY();
                 draw(context);
             }, animationSpeed)
         }
-
         else {
             draw(context);
         }
