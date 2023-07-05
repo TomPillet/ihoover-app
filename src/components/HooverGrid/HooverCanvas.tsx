@@ -70,13 +70,13 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [launchScript, launchMoveTo, hoover, canvasHeight, canvasWidth]);
 
-    const draw = (context: CanvasRenderingContext2D) => {
+    function draw (context: CanvasRenderingContext2D) {
         context.clearRect(0, 0, canvasWidth, canvasHeight)
         drawGrid(context);
         drawHoover(context);
     }
 
-    const drawGrid = (context: CanvasRenderingContext2D) => {
+    function drawGrid (context: CanvasRenderingContext2D) {
         context.beginPath();
     
         for (let x=0; x<=squaresX; x++) {
@@ -95,7 +95,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         context.closePath();
     }
 
-    const drawHoover = (context: CanvasRenderingContext2D) => {
+    function drawHoover (context: CanvasRenderingContext2D) {
         context.save();
 
         const hooverSVG = `M ${-hoover.centerX} ${hoover.centerY} H ${hoover.centerX} L 0 ${-hoover.centerY} Z`;
@@ -122,7 +122,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         context.restore();
     }
 
-    const adjustHooverX = () => {
+    function adjustHooverX() {
         if (hoover.x > moveToX) {
             if (hoover.direction !== CardinauxEnum.O) {
                 updateHoover((hoover.direction === CardinauxEnum.N) ? 'g' : 'd');
@@ -137,7 +137,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
             }
         }
     }
-    const adjustHooverY = () => {
+    function adjustHooverY() {
         if (hoover.y > moveToY) {
             if (hoover.direction !== CardinauxEnum.N) {
                 updateHoover((hoover.direction === CardinauxEnum.E) ? 'g' : 'd');
@@ -153,7 +153,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         }
     }
   
-    const updateHoover = (movement: string): boolean | Error => {
+    function updateHoover (movement: string): boolean | Error {
         movement.toLowerCase();
 
         if (movement === "d") {
@@ -188,30 +188,30 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         return false;
     }
 
-    const playMoveTo = () => {
+    function playMoveTo() {
         if (launchScript) { return; }
         setLaunchMoveTo(true);
     }
-    const updateMoveToX = (x: number) => {
+    function updateMoveToX (x: number) {
         setMoveToX((x) ? x : 0);
     }
-    const updateMoveToY = (y: number) => {
+    function updateMoveToY (y: number) {
         setMoveToY((y) ? y : 0);
     }
-  
-    const toggleScript = () => {
-        setUseScript(!useScript);
+
+    function toggleScript() {
     }
-    const updateScript = (value: string) => {
+    function updateScript (value: string) {
         let lastChar = value.slice(-1).toLowerCase();
         if (!(lastChar === "a" || lastChar === "d" || lastChar === "g" || !lastChar)) { return; }
         setScriptContent(value.toLowerCase());
     }
-    const playScript = () => {
+    function playScript() {
         if (launchMoveTo) { return; }
         setLaunchScript(true);
     }
-    const resetProcesses = () => {
+    
+    function resetProcesses () {
         setLaunchMoveTo(false);
         setLaunchScript(false);
         setScriptIteration(0);  
@@ -254,7 +254,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
                     
                     <div className="switch-mode">
                         <span className="mode">Manual</span>
-                        <ToggleSwitcher toggler={() => toggleScript()}></ToggleSwitcher>
+                        <ToggleSwitcher toggler={() => setUseScript(!useScript)}></ToggleSwitcher>
                         <span className="mode">Script</span>
                     </div>
 
