@@ -3,7 +3,6 @@ import './HooverCanvas.scss';
 
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
 import PlayButton from '../PlayButton/PlayButton';
-import { cp } from 'fs';
 
 interface HooverCanvasProps {
     squaresX: number,
@@ -68,6 +67,8 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
         if (launchScript) {
             setTimeout(() => {
+                if (scriptIteration === scriptContent.length) { stopProcesses(); return; }
+
                 if (updateHoover(scriptContent.charAt(scriptIteration))) {
                     stopProcesses();
                     return;
@@ -77,64 +78,24 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
                 const nextIteration = scriptIteration+1;
                 setScriptIteration(nextIteration);
-
-                if (scriptIteration === scriptContent.length) { stopProcesses() }
             }, movementDelay);
         }
+
         else if (launchMoveTo) {
             setTimeout(() => {
+                if (moveToX === hooverX && moveToY === hooverY) { stopProcesses(); return; }
+
                 if (moveToX !== hooverX) {
-                    if (hooverX > moveToX) {
-                        // Doit aller sur la gauche
-                        if (hooverDir !== Cardinaux.O) {
-                            // Si mauvaise direction :
-                            // Tourner à droite, sauf si déjà dirigé vers le haut donc tourner à gauche
-                            updateHoover((hooverDir === Cardinaux.N) ? 'g' : 'd');
-                        } else { 
-                            // Si bonne direction, avancer sur la gauche
-                            setHooverX(hooverX-1);
-                        }
-                    } else {
-                        // Doit aller sur la droite
-                        if (hooverDir !== Cardinaux.E) {
-                            // Si mauvaise direction :
-                            // Tourner à droite, sauf si déjà dirigé vers le bas donc tourner à gauche
-                            updateHoover((hooverDir === Cardinaux.S) ? 'g' : 'd');
-                        } else { 
-                            // Si bonne direction, avancer sur la gauche
-                            setHooverX(hooverX+1);
-                        }
-                    }
+                    adjustHooverX();
                 }
-                else if (moveToY !== hooverY) {
-                    if (hooverY > moveToY) {
-                        // Doit aller vers le haut
-                        if (hooverDir !== Cardinaux.N) {
-                            // Si mauvaise direciton :
-                            // Tourner à droite, sauf si déjà dirigé vers la droite donc tourner à gauche
-                            updateHoover((hooverDir === Cardinaux.E) ? 'g' : 'd');
-                        } else {
-                            // Si bonne direction, avancer vers le haut
-                            setHooverY(hooverY-1);
-                        }
-                    } else {
-                        // Doit aller vers le bas
-                        if (hooverDir !== Cardinaux.S) {
-                            // Si mauvaise direciton :
-                            // Tourner à droite, sauf si déjà dirigé vers la gauche donc tourner à gauche
-                            updateHoover((hooverDir === Cardinaux.O) ? 'g' : 'd');
-                        } else {
-                            // Si bonne direction, avancer vers le bas
-                            setHooverY(hooverY+1);
-                        }
-                    }
+                if (moveToY !== hooverY) {
+                    adjustHooverY();
                 }
 
                 draw(context);
-
-                if (moveToX === hooverX && moveToY === hooverY) { stopProcesses(); }
             }, movementDelay)
         }
+
         else {
             draw(context);
         }
@@ -189,6 +150,37 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         context.fill();
       
         context.restore();
+    }
+
+    const adjustHooverX = () => {
+        if (hooverX > moveToX) {
+            if (hooverDir !== Cardinaux.O) {
+                updateHoover((hooverDir === Cardinaux.N) ? 'g' : 'd');
+            } else { 
+                setHooverX(hooverX-1);
+            }
+        } else if (hooverX < moveToX) {
+            if (hooverDir !== Cardinaux.E) {
+                updateHoover((hooverDir === Cardinaux.S) ? 'g' : 'd');
+            } else { 
+                setHooverX(hooverX+1);
+            }
+        }
+    }
+    const adjustHooverY = () => {
+        if (hooverY > moveToY) {
+            if (hooverDir !== Cardinaux.N) {
+                updateHoover((hooverDir === Cardinaux.E) ? 'g' : 'd');
+            } else {
+                setHooverY(hooverY-1);
+            }
+        } else if (hooverY < moveToY) {
+            if (hooverDir !== Cardinaux.S) {
+                updateHoover((hooverDir === Cardinaux.O) ? 'g' : 'd');
+            } else {
+                setHooverY(hooverY+1);
+            }
+        }
     }
   
     // Doit return true si le hoover ne peut pas avancer car se situe au bord de la grille
