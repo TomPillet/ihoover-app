@@ -13,10 +13,11 @@ interface HooverCanvasProps {
     canvasWidth: number,
     squaresX: number,
     squaresY: number,
-    squareSize: number
+    squareSize: number,
+    animationSpeed: number
 }
  
-const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squaresX, squaresY, squareSize}) => { 
+const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squaresX, squaresY, squareSize, animationSpeed}) => { 
     const createNewHoover = (x: number, y: number, dir: CardinauxEnum) => {
         return new Hoover(x, y, dir, 30, x*squareSize, y*squareSize);
     }
@@ -26,11 +27,10 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
     const [scriptContent, setScriptContent] = useState('');
     const [launchScript, setLaunchScript] = useState(false);
     const [scriptIteration, setScriptIteration] = useState(0);
-    
+
     const [launchMoveTo, setLaunchMoveTo] = useState(false);
     const [moveToX, setMoveToX] = useState(hoover.x);
     const [moveToY, setMoveToY] = useState(hoover.y);
-    const movementDelay = 200;
 
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
@@ -50,7 +50,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
 
                 draw(context);
                 setScriptIteration(scriptIteration+1);
-            }, movementDelay);
+            }, animationSpeed);
         }
 
         else if (launchMoveTo) {
@@ -60,7 +60,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
                 adjustHooverX();
                 adjustHooverY();
                 draw(context);
-            }, movementDelay)
+            }, animationSpeed)
         }
 
         else {
@@ -152,49 +152,38 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         }
     }
   
-    // Doit return true si le hoover ne peut pas avancer car se situe au bord de la grille
-    const updateHoover = (movement: string): boolean => {
+    const updateHoover = (movement: string): boolean | Error => {
         movement.toLowerCase();
 
         if (movement === "d") {
             let nextDir = Cardinaux.of(CardinauxEnum).next(hoover.direction);
             setHoover(createNewHoover(hoover.x, hoover.y, nextDir));
         }
-
         else if (movement === "g") {
             let prevDir = Cardinaux.of(CardinauxEnum).prev(hoover.direction);
             setHoover(createNewHoover(hoover.x, hoover.y, prevDir));
         }
-
         else if (movement === "a") {
-            switch (hoover.direction) {           
-                case CardinauxEnum.N:
-                    if (hoover.y > 0) { 
-                        setHoover(createNewHoover(hoover.x, hoover.y-1, hoover.direction));
-                        break;
-                    }
-                    return true;
+            switch (hoover.direction) {       
                 case CardinauxEnum.E:
-                    if (hoover.x < squaresX-1) {
-                        setHoover(createNewHoover(hoover.x+1, hoover.y, hoover.direction));
-                        break;
-                    }
-                    return true;
-                case CardinauxEnum.S:
-                    if (hoover.y < squaresY-1) {
-                        setHoover(createNewHoover(hoover.x, hoover.y+1, hoover.direction));
-                        break;
-                    }
-                    return true;
+                    if (hoover.x >= squaresX-1) { return Error("Error on movement forward on CardinauxEnum.E"); }
+                    setHoover(createNewHoover(hoover.x+1, hoover.y, hoover.direction));
+                    break;
                 case CardinauxEnum.O:
-                    if (hoover.x > 0) {
-                        setHoover(createNewHoover(hoover.x-1, hoover.y, hoover.direction));
-                        break;
-                    }
-                    return true;
+                    if (hoover.x <= 0) { return Error("Error on movement forward on CardinauxEnum.O"); }
+                    setHoover(createNewHoover(hoover.x-1, hoover.y, hoover.direction));
+                    break;    
+                case CardinauxEnum.N:
+                    if (hoover.y <= 0) { return Error("Error on movement forward on CardinauxEnum.N"); }
+                    setHoover(createNewHoover(hoover.x, hoover.y-1, hoover.direction));
+                    break;
+                case CardinauxEnum.S:
+                    if (hoover.y >= squaresY-1) { return Error("Error on movement forward on CardinauxEnum.S"); }
+                    setHoover(createNewHoover(hoover.x, hoover.y+1, hoover.direction));
+                    break;
             }
         }
-
+        
         return false;
     }
 

@@ -29,7 +29,7 @@ function App() {
         </label>
       </div>
 
-      <HooverCanvas canvasHeight={squaresX*squareSize} canvasWidth={squaresY*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize}></HooverCanvas>
+      <HooverCanvas canvasHeight={squaresX*squareSize} canvasWidth={squaresY*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize} animationSpeed={200}></HooverCanvas>
     </div>
   );
 }
