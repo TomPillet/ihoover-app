@@ -4,26 +4,12 @@ import './HooverCanvas.scss';
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
 import PlayButton from '../PlayButton/PlayButton';
 
+import { Cardinaux, CardinauxEnumIndex } from '../../classes/Cardinaux';
+import { Hoover } from '../../classes/Hoover';
+
 interface HooverCanvasProps {
     squaresX: number,
     squaresY: number
-}
-
-enum Cardinaux {
-  N = "N",
-  E = "E",
-  S = "S",
-  O = "O"
-}
-
-class EnumIndex {
-  static of<T extends object>(e: T) {
-    const values = Object.values(e);
-    return {
-      next: <K extends keyof T>(v: T[K]) => values[(values.indexOf(v)+1) % values.length],
-      prev: <K extends keyof T>(v: T[K]) => values[(values.indexOf(v) === 0) ? values.length-1 : values.indexOf(v)-1]
-    }
-  }
 }
  
 const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => { 
@@ -36,30 +22,24 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const [launchScript, setLaunchScript] = useState(false);
     const [scriptIteration, setScriptIteration] = useState(0);
 
-    const [hooverX, setHooverX] = useState(5);
-    const [hooverY, setHooverY] = useState(5);
-    const [hooverDir, setHooverDir] = useState(Cardinaux.N);
-    const [moveToX, setMoveToX] = useState(hooverX);
-    const [moveToY, setMoveToY] = useState(hooverY);
-    const [launchMoveTo, setLaunchMoveTo] = useState(false);
-    const movementDelay = 350;
+    const createNewHoover = (x: number, y: number, dir: Cardinaux) => {
+        return new Hoover(x, y, dir, 30, x*squareSize, y*squareSize);
+    }
+    const [hoover, setHoover] = useState(createNewHoover(5, 5, Cardinaux.N));
 
-    const hooverWidth: number = 30;
-    // utilisation de pythagore pour la hauteur du triangle qui doit être équilatéral
-    const hooverHeight: number = hooverWidth * Math.sqrt(3) / 2;
-    const hooverCenterX: number = hooverWidth / 2;
-    const hooverCenterY: number = hooverHeight / 2;
-    const hooverOffsetX = hooverX*squareSize;
-    const hooverOffsetY = hooverY*squareSize;
+    const [launchMoveTo, setLaunchMoveTo] = useState(false);
+    const [moveToX, setMoveToX] = useState(hoover.x);
+    const [moveToY, setMoveToY] = useState(hoover.y);
+    const movementDelay = 200;
 
     // définition de padding pour les squares de la grille car le triangle doit être au centre de ceux-ci
-    const squareLeftPadding = (squareSize - hooverWidth) / 2;
-    const squareTopPadding = (squareSize - hooverHeight)/2;
+    const squareLeftPadding = (squareSize - hoover.width) / 2;
+    const squareTopPadding = (squareSize - hoover.height)/2;
   
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
-        if (hooverX > squaresX-1) { setHooverX(squaresX-1); }
-        if (hooverY > squaresY-1) { setHooverY(squaresY-1); }
+        if (hoover.x > squaresX-1) { setHoover(createNewHoover(squaresX-1, hoover.y, hoover.direction)); }
+        if (hoover.y > squaresY-1) { setHoover(createNewHoover(hoover.x, squaresY-1, hoover.direction)); }
 
         const context = canvas.current?.getContext('2d');
 
@@ -83,14 +63,10 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
         else if (launchMoveTo) {
             setTimeout(() => {
-                if (moveToX === hooverX && moveToY === hooverY) { stopProcesses(); return; }
+                if (moveToX === hoover.x && moveToY === hoover.y) { stopProcesses(); return; }
 
-                if (moveToX !== hooverX) {
-                    adjustHooverX();
-                }
-                if (moveToY !== hooverY) {
-                    adjustHooverY();
-                }
+                adjustHooverX();
+                adjustHooverY();
 
                 draw(context);
             }, movementDelay)
@@ -100,7 +76,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
             draw(context);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [launchScript, launchMoveTo, hooverDir, hooverX, hooverY, canvasHeight, canvasWidth]);
+    }, [launchScript, launchMoveTo, hoover, canvasHeight, canvasWidth]);
 
     const draw = (context: CanvasRenderingContext2D) => {
         context.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -130,11 +106,11 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const drawHoover = (context: CanvasRenderingContext2D) => {
         context.save();
 
-        const hooverSVG = `M ${-hooverCenterX} ${hooverCenterY} H ${hooverCenterX} L 0 ${-hooverCenterY} Z`;
+        const hooverSVG = `M ${-hoover.centerX} ${hoover.centerY} H ${hoover.centerX} L 0 ${-hoover.centerY} Z`;
         const path = new Path2D(hooverSVG);
 
-        const drawOffsetX = squareLeftPadding + hooverCenterX + hooverOffsetX;
-        const drawOffsetY = squareTopPadding + hooverCenterY + hooverOffsetY;
+        const drawOffsetX = squareLeftPadding + hoover.centerX + hoover.offsetX;
+        const drawOffsetY = squareTopPadding + hoover.centerY + hoover.offsetY;
 
         context.translate(drawOffsetX, drawOffsetY);
         context.rotate((Math.PI / 180) * getHooverRotation());
@@ -145,7 +121,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         context.fillStyle = "#ffa07a";
         context.fill(path);
 
-        context.arc(0, -hooverCenterY, 3, 0, 2*Math.PI);
+        context.arc(0, -hoover.centerY, 3, 0, 2*Math.PI);
         context.fillStyle = "#c26f4e";
         context.fill();
       
@@ -153,32 +129,32 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     }
 
     const adjustHooverX = () => {
-        if (hooverX > moveToX) {
-            if (hooverDir !== Cardinaux.O) {
-                updateHoover((hooverDir === Cardinaux.N) ? 'g' : 'd');
+        if (hoover.x > moveToX) {
+            if (hoover.direction !== Cardinaux.O) {
+                updateHoover((hoover.direction === Cardinaux.N) ? 'g' : 'd');
             } else { 
-                setHooverX(hooverX-1);
+                updateHoover('a');
             }
-        } else if (hooverX < moveToX) {
-            if (hooverDir !== Cardinaux.E) {
-                updateHoover((hooverDir === Cardinaux.S) ? 'g' : 'd');
+        } else if (hoover.x < moveToX) {
+            if (hoover.direction !== Cardinaux.E) {
+                updateHoover((hoover.direction === Cardinaux.S) ? 'g' : 'd');
             } else { 
-                setHooverX(hooverX+1);
+                updateHoover('a');
             }
         }
     }
     const adjustHooverY = () => {
-        if (hooverY > moveToY) {
-            if (hooverDir !== Cardinaux.N) {
-                updateHoover((hooverDir === Cardinaux.E) ? 'g' : 'd');
+        if (hoover.y > moveToY) {
+            if (hoover.direction !== Cardinaux.N) {
+                updateHoover((hoover.direction === Cardinaux.E) ? 'g' : 'd');
             } else {
-                setHooverY(hooverY-1);
+                updateHoover('a');
             }
-        } else if (hooverY < moveToY) {
-            if (hooverDir !== Cardinaux.S) {
-                updateHoover((hooverDir === Cardinaux.O) ? 'g' : 'd');
+        } else if (hoover.y < moveToY) {
+            if (hoover.direction !== Cardinaux.S) {
+                updateHoover((hoover.direction === Cardinaux.O) ? 'g' : 'd');
             } else {
-                setHooverY(hooverY+1);
+                updateHoover('a');
             }
         }
     }
@@ -188,34 +164,38 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         movement.toLowerCase();
 
         if (movement === "d") {
-            let nextDir = EnumIndex.of(Cardinaux).next(hooverDir);
-            setHooverDir(nextDir);
-        } else if (movement === "g") {
-            let prevDir = EnumIndex.of(Cardinaux).prev(hooverDir);
-            setHooverDir(prevDir);
-        } else if (movement === "a") {
-            switch (hooverDir) {           
+            let nextDir = CardinauxEnumIndex.of(Cardinaux).next(hoover.direction);
+            setHoover(createNewHoover(hoover.x, hoover.y, nextDir));
+        }
+
+        else if (movement === "g") {
+            let prevDir = CardinauxEnumIndex.of(Cardinaux).prev(hoover.direction);
+            setHoover(createNewHoover(hoover.x, hoover.y, prevDir));
+        }
+
+        else if (movement === "a") {
+            switch (hoover.direction) {           
                 case Cardinaux.N:
-                    if (hooverY > 0) { 
-                        setHooverY(hooverY-1);
+                    if (hoover.y > 0) { 
+                        setHoover(createNewHoover(hoover.x, hoover.y-1, hoover.direction));
                         break;
                     }
                     return true;
                 case Cardinaux.E:
-                    if (hooverX < squaresX-1) {
-                        setHooverX(hooverX+1); 
+                    if (hoover.x < squaresX-1) {
+                        setHoover(createNewHoover(hoover.x+1, hoover.y, hoover.direction));
                         break;
                     }
                     return true;
                 case Cardinaux.S:
-                    if (hooverY < squaresY-1) {
-                        setHooverY(hooverY+1);
+                    if (hoover.y < squaresY-1) {
+                        setHoover(createNewHoover(hoover.x, hoover.y+1, hoover.direction));
                         break;
                     }
                     return true;
                 case Cardinaux.O:
-                    if (hooverX > 0) {
-                        setHooverX(hooverX-1);
+                    if (hoover.x > 0) {
+                        setHoover(createNewHoover(hoover.x-1, hoover.y, hoover.direction));
                         break;
                     }
                     return true;
@@ -226,9 +206,9 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     }
 
     const getHooverRotation = (): number => {
-        if (hooverDir === Cardinaux.E)      { return 90  }
-        else if (hooverDir === Cardinaux.S) { return 180 }
-        else if (hooverDir === Cardinaux.O) { return 270 }
+        if (hoover.direction === Cardinaux.E)      { return 90  }
+        else if (hoover.direction === Cardinaux.S) { return 180 }
+        else if (hoover.direction === Cardinaux.O) { return 270 }
         return 0;
     }
 
@@ -260,7 +240,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
             setLaunchMoveTo(false);
             setLaunchScript(false);
             setScriptIteration(0);
-        }, 500);    
+        }, movementDelay);    
     }
 
     return ( 
@@ -276,9 +256,9 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
                 <div className="hoover-data">
                     <h3 className="hoover-data-header">Hoover data :</h3>
                     <div className="hoover-coords">
-                        <span>X : {hooverX}</span>
-                        <span>Y : {hooverY}</span>
-                        <span>Direction : {hooverDir}</span>
+                        <span>X : {hoover.x}</span>
+                        <span>Y : {hoover.y}</span>
+                        <span>Direction : {hoover.direction}</span>
                     </div>
                     <div className="hoover-move-to-inner">
                         <label htmlFor="move-toX">Move to X :
