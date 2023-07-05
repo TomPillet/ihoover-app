@@ -4,7 +4,8 @@ import './HooverCanvas.scss';
 import ToggleSwitcher from '../ToggleSwitcher/ToggleSwitcher';
 import PlayButton from '../PlayButton/PlayButton';
 
-import { Cardinaux, CardinauxEnumIndex } from '../../classes/Cardinaux';
+import { CardinauxEnum } from '../../enums/CardinauxEnum';
+import { Cardinaux } from '../../classes/Cardinaux';
 import { Hoover } from '../../classes/Hoover';
 
 interface HooverCanvasProps {
@@ -22,10 +23,10 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     const [launchScript, setLaunchScript] = useState(false);
     const [scriptIteration, setScriptIteration] = useState(0);
 
-    const createNewHoover = (x: number, y: number, dir: Cardinaux) => {
+    const createNewHoover = (x: number, y: number, dir: CardinauxEnum) => {
         return new Hoover(x, y, dir, 30, x*squareSize, y*squareSize);
     }
-    const [hoover, setHoover] = useState(createNewHoover(5, 5, Cardinaux.N));
+    const [hoover, setHoover] = useState(createNewHoover(5, 5, CardinauxEnum.N));
 
     const [launchMoveTo, setLaunchMoveTo] = useState(false);
     const [moveToX, setMoveToX] = useState(hoover.x);
@@ -47,27 +48,22 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
         if (launchScript) {
             setTimeout(() => {
-                if (scriptIteration === scriptContent.length) { stopProcesses(); return; }
-
-                if (updateHoover(scriptContent.charAt(scriptIteration))) {
-                    stopProcesses();
+                if (scriptIteration === scriptContent.length || updateHoover(scriptContent.charAt(scriptIteration))) { 
+                    resetProcesses();
                     return;
                 }
 
                 draw(context);
-
-                const nextIteration = scriptIteration+1;
-                setScriptIteration(nextIteration);
+                setScriptIteration(scriptIteration+1);
             }, movementDelay);
         }
 
         else if (launchMoveTo) {
             setTimeout(() => {
-                if (moveToX === hoover.x && moveToY === hoover.y) { stopProcesses(); return; }
+                if (moveToX === hoover.x && moveToY === hoover.y) { resetProcesses(); return; }
 
                 adjustHooverX();
                 adjustHooverY();
-
                 draw(context);
             }, movementDelay)
         }
@@ -113,7 +109,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         const drawOffsetY = squareTopPadding + hoover.centerY + hoover.offsetY;
 
         context.translate(drawOffsetX, drawOffsetY);
-        context.rotate((Math.PI / 180) * getHooverRotation());
+        context.rotate((Math.PI / 180) * Cardinaux.getRotationDegree(hoover.direction));
 
         context.strokeStyle = "#c26f4e";
         context.lineWidth = 4;
@@ -130,14 +126,14 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
 
     const adjustHooverX = () => {
         if (hoover.x > moveToX) {
-            if (hoover.direction !== Cardinaux.O) {
-                updateHoover((hoover.direction === Cardinaux.N) ? 'g' : 'd');
+            if (hoover.direction !== CardinauxEnum.O) {
+                updateHoover((hoover.direction === CardinauxEnum.N) ? 'g' : 'd');
             } else { 
                 updateHoover('a');
             }
         } else if (hoover.x < moveToX) {
-            if (hoover.direction !== Cardinaux.E) {
-                updateHoover((hoover.direction === Cardinaux.S) ? 'g' : 'd');
+            if (hoover.direction !== CardinauxEnum.E) {
+                updateHoover((hoover.direction === CardinauxEnum.S) ? 'g' : 'd');
             } else { 
                 updateHoover('a');
             }
@@ -145,14 +141,14 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
     }
     const adjustHooverY = () => {
         if (hoover.y > moveToY) {
-            if (hoover.direction !== Cardinaux.N) {
-                updateHoover((hoover.direction === Cardinaux.E) ? 'g' : 'd');
+            if (hoover.direction !== CardinauxEnum.N) {
+                updateHoover((hoover.direction === CardinauxEnum.E) ? 'g' : 'd');
             } else {
                 updateHoover('a');
             }
         } else if (hoover.y < moveToY) {
-            if (hoover.direction !== Cardinaux.S) {
-                updateHoover((hoover.direction === Cardinaux.O) ? 'g' : 'd');
+            if (hoover.direction !== CardinauxEnum.S) {
+                updateHoover((hoover.direction === CardinauxEnum.O) ? 'g' : 'd');
             } else {
                 updateHoover('a');
             }
@@ -164,36 +160,36 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         movement.toLowerCase();
 
         if (movement === "d") {
-            let nextDir = CardinauxEnumIndex.of(Cardinaux).next(hoover.direction);
+            let nextDir = Cardinaux.of(CardinauxEnum).next(hoover.direction);
             setHoover(createNewHoover(hoover.x, hoover.y, nextDir));
         }
 
         else if (movement === "g") {
-            let prevDir = CardinauxEnumIndex.of(Cardinaux).prev(hoover.direction);
+            let prevDir = Cardinaux.of(CardinauxEnum).prev(hoover.direction);
             setHoover(createNewHoover(hoover.x, hoover.y, prevDir));
         }
 
         else if (movement === "a") {
             switch (hoover.direction) {           
-                case Cardinaux.N:
+                case CardinauxEnum.N:
                     if (hoover.y > 0) { 
                         setHoover(createNewHoover(hoover.x, hoover.y-1, hoover.direction));
                         break;
                     }
                     return true;
-                case Cardinaux.E:
+                case CardinauxEnum.E:
                     if (hoover.x < squaresX-1) {
                         setHoover(createNewHoover(hoover.x+1, hoover.y, hoover.direction));
                         break;
                     }
                     return true;
-                case Cardinaux.S:
+                case CardinauxEnum.S:
                     if (hoover.y < squaresY-1) {
                         setHoover(createNewHoover(hoover.x, hoover.y+1, hoover.direction));
                         break;
                     }
                     return true;
-                case Cardinaux.O:
+                case CardinauxEnum.O:
                     if (hoover.x > 0) {
                         setHoover(createNewHoover(hoover.x-1, hoover.y, hoover.direction));
                         break;
@@ -203,13 +199,6 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         }
 
         return false;
-    }
-
-    const getHooverRotation = (): number => {
-        if (hoover.direction === Cardinaux.E)      { return 90  }
-        else if (hoover.direction === Cardinaux.S) { return 180 }
-        else if (hoover.direction === Cardinaux.O) { return 270 }
-        return 0;
     }
 
     const playMoveTo = () => {
@@ -235,12 +224,10 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         if (launchMoveTo) { return; }
         setLaunchScript(true);
     }
-    const stopProcesses = () => {
-        setTimeout(() => {
-            setLaunchMoveTo(false);
-            setLaunchScript(false);
-            setScriptIteration(0);
-        }, movementDelay);    
+    const resetProcesses = () => {
+        setLaunchMoveTo(false);
+        setLaunchScript(false);
+        setScriptIteration(0);  
     }
 
     return ( 

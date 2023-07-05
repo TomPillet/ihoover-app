@@ -1,9 +1,9 @@
-import { Cardinaux } from "./Cardinaux";
+import { CardinauxEnum } from "../enums/CardinauxEnum";
 
 export class Hoover {
     x: number;
     y: number;
-    direction: Cardinaux;
+    direction: CardinauxEnum;
     width: number;
     height: number;
     centerX: number;
@@ -11,7 +11,7 @@ export class Hoover {
     offsetX: number;
     offsetY: number;
 
-    constructor(posX: number, posY: number, dir: Cardinaux, width: number, offsetX: number, offsetY: number) {
+    constructor(posX: number, posY: number, dir: CardinauxEnum, width: number, offsetX: number, offsetY: number) {
         this.x = posX;
         this.y = posY;
         this.direction = dir;
