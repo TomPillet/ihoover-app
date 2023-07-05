@@ -9,34 +9,29 @@ import { Cardinaux } from '../../classes/Cardinaux';
 import { Hoover } from '../../classes/Hoover';
 
 interface HooverCanvasProps {
+    canvasHeight: number,
+    canvasWidth: number,
     squaresX: number,
-    squaresY: number
+    squaresY: number,
+    squareSize: number
 }
  
-const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => { 
-    const squareSize: number = 100;
-    const canvasHeight = squareSize*squaresY;
-    const canvasWidth = squareSize*squaresX;
-
-    const [useScript, setUseScript] = useState(false);
-    const [scriptContent, setScriptContent] = useState('');
-    const [launchScript, setLaunchScript] = useState(false);
-    const [scriptIteration, setScriptIteration] = useState(0);
-
+const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squaresX, squaresY, squareSize}) => { 
     const createNewHoover = (x: number, y: number, dir: CardinauxEnum) => {
         return new Hoover(x, y, dir, 30, x*squareSize, y*squareSize);
     }
     const [hoover, setHoover] = useState(createNewHoover(5, 5, CardinauxEnum.N));
 
+    const [useScript, setUseScript] = useState(false);
+    const [scriptContent, setScriptContent] = useState('');
+    const [launchScript, setLaunchScript] = useState(false);
+    const [scriptIteration, setScriptIteration] = useState(0);
+    
     const [launchMoveTo, setLaunchMoveTo] = useState(false);
     const [moveToX, setMoveToX] = useState(hoover.x);
     const [moveToY, setMoveToY] = useState(hoover.y);
     const movementDelay = 200;
 
-    // définition de padding pour les squares de la grille car le triangle doit être au centre de ceux-ci
-    const squareLeftPadding = (squareSize - hoover.width) / 2;
-    const squareTopPadding = (squareSize - hoover.height)/2;
-  
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         if (hoover.x > squaresX-1) { setHoover(createNewHoover(squaresX-1, hoover.y, hoover.direction)); }
@@ -105,6 +100,8 @@ const HooverCanvas: FC<HooverCanvasProps> = ({squaresX, squaresY}) => {
         const hooverSVG = `M ${-hoover.centerX} ${hoover.centerY} H ${hoover.centerX} L 0 ${-hoover.centerY} Z`;
         const path = new Path2D(hooverSVG);
 
+        const squareLeftPadding = (squareSize - hoover.width) / 2;
+        const squareTopPadding = (squareSize - hoover.height) / 2;
         const drawOffsetX = squareLeftPadding + hoover.centerX + hoover.offsetX;
         const drawOffsetY = squareTopPadding + hoover.centerY + hoover.offsetY;
 

@@ -4,6 +4,7 @@ import './App.scss';
 import HooverCanvas from './components/HooverGrid/HooverCanvas';
 
 function App() {
+  const squareSize = 100;
   const [squaresX, setSquaresX] = useState(10);
   const [squaresY, setSquaresY] = useState(10);
 
@@ -28,7 +29,7 @@ function App() {
         </label>
       </div>
 
-      <HooverCanvas squaresX={squaresX} squaresY={squaresY}></HooverCanvas>
+      <HooverCanvas canvasHeight={squaresX*squareSize} canvasWidth={squaresY*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize}></HooverCanvas>
     </div>
   );
 }
