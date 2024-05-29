@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 import './FeedbackModal.scss';
 
@@ -9,24 +9,38 @@ interface FeedbackModalProps {
 }
  
 const FeedbackModal: FC<FeedbackModalProps> = ({modalClosed, msg, type}) => {
-    const [isDisplayed, setIsDisplayed] = useState(false);
+    const [isModalDisplayed, setIsModalDisplayed] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
+    
 
-    function reset () {
-        setIsDisplayed(false);
+    const closeModal = useCallback(() => {
+        setIsModalDisplayed(false);
         modalClosed();
-    }
+    }, [modalClosed]);
 
     useEffect(() => {
-        if (msg.length > 0) {
-            setIsDisplayed(true);
+        function handleClickOutside(event: MouseEvent) {
+            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+                closeModal();
+            }
         }
-    }, [msg, isDisplayed])
 
+        if (msg.length > 0) {
+            setIsModalDisplayed(true);
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [msg, isModalDisplayed, closeModal])
+
+    
     return (
-        <div className="feedback-modal" style={{display: (isDisplayed) ? 'flex' : "none"}}>
+        <div className="feedback-modal" style={{display: (isModalDisplayed) ? 'flex' : "none"}} ref={modalRef}>
             <div className="feedback-msg">{msg}</div>
             <div className="feedback-buttons">
-                <button onClick={() => reset()} className={type}>{(type==="success" ? "OK" : "CLOSE")}</button>
+                <button onClick={() => closeModal()} className={type}>{(type==="success" ? "OK" : "CLOSE")}</button>
             </div>
         </div>
     );
