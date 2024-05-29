@@ -1,0 +1,45 @@
+.feedback-modal {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: fit-content;
+    width: 480px;
+    padding: 24px;
+    background-color: white;
+    box-shadow: 0px 0px 12px rgb(196, 196, 196);
+    border-radius: 8px;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+.feedback-msg {
+    margin-bottom: 16px;
+    font-size: 1.2em;
+}
+.feedback-buttons {
+    display: flex;
+
+    & button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-weight: bold;
+        transition: all .3s;
+
+        &:hover {
+            transform: scale(1.2);
+        }
+
+        &.error {
+            background-color: red;
+        }
+        &.success {
+            background-color: green;
+        }
+    }
+}

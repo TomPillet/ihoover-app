@@ -9,6 +9,7 @@ import { Cardinaux } from '../../classes/Cardinaux';
 import { Hoover } from '../../classes/Hoover';
 
 interface HooverCanvasProps {
+    hooverFeedback: (msg: string, type: string) => void,
     canvasHeight: number,
     canvasWidth: number,
     squaresX: number,
@@ -17,7 +18,7 @@ interface HooverCanvasProps {
     animationSpeed: number
 }
  
-const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squaresX, squaresY, squareSize, animationSpeed}) => { 
+const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canvasWidth, squaresX, squaresY, squareSize, animationSpeed}) => { 
     const createNewHoover = (x: number, y: number, dir: CardinauxEnum) => {
         return new Hoover(x, y, dir, 30, x*squareSize, y*squareSize);
     }
@@ -32,6 +33,10 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
     const [moveToX, setMoveToX] = useState(hoover.x);
     const [moveToY, setMoveToY] = useState(hoover.y);
 
+    const triggerFeedback = (msg: string, type: string) => {
+        hooverFeedback(msg, type);
+    }
+
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         if (hoover.x > squaresX-1) { setHoover(createNewHoover(squaresX-1, hoover.y, hoover.direction)); }
@@ -43,9 +48,12 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
 
         if (launchScript) {
             setTimeout(() => {
-                if (scriptIteration === scriptContent.length || updateHoover(scriptContent.charAt(scriptIteration))) { 
+                if (scriptIteration === scriptContent.length) {
+                    triggerFeedback("Bravo ! Le script a été exécuté jusqu'au bout.", "success");
                     resetProcesses();
                     return;
+                } else if (updateHoover(scriptContent.charAt(scriptIteration))) {
+                    resetProcesses();
                 }
 
                 setScriptIteration(scriptIteration+1);
@@ -155,6 +163,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
   
     function updateHoover (movement: string): boolean | Error {
         movement.toLowerCase();
+        const errorMsg = "Hoover encoutered an error and cannot order to your action." + (useScript ? " Execution of your script will be canceled." : "");
 
         if (movement === "d") {
             let nextDir = Cardinaux.of(CardinauxEnum).next(hoover.direction);
@@ -167,19 +176,31 @@ const HooverCanvas: FC<HooverCanvasProps> = ({canvasHeight, canvasWidth, squares
         else if (movement === "a") {
             switch (hoover.direction) {       
                 case CardinauxEnum.E:
-                    if (hoover.x >= squaresX-1) { return Error("Error on movement forward on CardinauxEnum.E"); }
+                    if (hoover.x >= squaresX-1) {
+                        triggerFeedback(errorMsg, "error");
+                        return Error("Hoover encountered an error."); 
+                    }
                     setHoover(createNewHoover(hoover.x+1, hoover.y, hoover.direction));
                     break;
                 case CardinauxEnum.O:
-                    if (hoover.x <= 0) { return Error("Error on movement forward on CardinauxEnum.O"); }
+                    if (hoover.x <= 0) {
+                        triggerFeedback(errorMsg, "error");
+                        return Error("Hoover encounter an error.");
+                    }
                     setHoover(createNewHoover(hoover.x-1, hoover.y, hoover.direction));
                     break;    
                 case CardinauxEnum.N:
-                    if (hoover.y <= 0) { return Error("Error on movement forward on CardinauxEnum.N"); }
+                    if (hoover.y <= 0) {
+                        triggerFeedback(errorMsg, "error");
+                        return Error("Hoover encounter an error.");
+                    }
                     setHoover(createNewHoover(hoover.x, hoover.y-1, hoover.direction));
                     break;
                 case CardinauxEnum.S:
-                    if (hoover.y >= squaresY-1) { return Error("Error on movement forward on CardinauxEnum.S"); }
+                    if (hoover.y >= squaresY-1) {
+                        triggerFeedback(errorMsg, "error");
+                        return Error("Hoover encounter an error.");
+                    }
                     setHoover(createNewHoover(hoover.x, hoover.y+1, hoover.direction));
                     break;
             }

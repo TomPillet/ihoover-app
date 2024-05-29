@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.scss';
 
 import HooverCanvas from './components/HooverGrid/HooverCanvas';
+import FeedbackModal from './components/FeedbackModal/FeedbackModal';
 
 function App() {
   const squareSize = 100;
@@ -13,6 +14,14 @@ function App() {
   }
   const updateSquaresY = (value: number) => {
     setSquaresY((value) ? value : 1);
+  }
+
+  const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [feedbackType, setFeedbackType] = useState("");
+
+  const hooverFeedback = (msg: string, type: string) => {
+    setFeedbackMsg(msg);
+    setFeedbackType(type);
   }
 
   return (
@@ -29,7 +38,8 @@ function App() {
         </label>
       </div>
 
-      <HooverCanvas canvasHeight={squaresX*squareSize} canvasWidth={squaresY*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize} animationSpeed={200}></HooverCanvas>
+      <HooverCanvas hooverFeedback={hooverFeedback} canvasHeight={squaresX*squareSize} canvasWidth={squaresY*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize} animationSpeed={200}></HooverCanvas>
+      <FeedbackModal msg={feedbackMsg} type={feedbackType}></FeedbackModal>
     </div>
   );
 }
