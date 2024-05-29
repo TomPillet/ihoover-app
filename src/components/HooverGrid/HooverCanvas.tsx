@@ -49,7 +49,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         if (launchScript) {
             setTimeout(() => {
                 if (scriptIteration === scriptContent.length) {
-                    triggerFeedback("Bravo ! Le script a été exécuté jusqu'au bout.", "success");
+                    triggerFeedback("Weldone ! The script was executed to completion.", "success");
                     resetProcesses();
                     return;
                 } else if (updateHoover(scriptContent.charAt(scriptIteration))) {
@@ -124,7 +124,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         context.fill(path);
 
         context.arc(0, -hoover.centerY, 3, 0, 2*Math.PI);
-        context.fillStyle = "#c26f4e";
+        context.fillStyle = "#131313";
         context.fill();
       
         context.restore();
@@ -163,7 +163,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
   
     function updateHoover (movement: string): boolean | Error {
         movement.toLowerCase();
-        const errorMsg = "Hoover encoutered an error and cannot order to your action." + (useScript ? " Execution of your script will be canceled." : "");
+        const errorMsg = "Hoover encoutered an error and cannot perform your action." + (useScript ? " Execution of your script will be canceled." : "");
 
         if (movement === "d") {
             let nextDir = Cardinaux.of(CardinauxEnum).next(hoover.direction);
@@ -280,7 +280,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
                     <div className="instructions-wrapper">
                         <div id="script-instructions" className={`instructions-card ${(!useScript)? 'hide' : ''}`}>
                             <textarea name="script" id="script" disabled={launchScript}
-                                value={scriptContent}
+                                value={scriptContent} placeholder='"A" pour Avancer, "D" pour Droite, "G" pour Gauche. Exemple : AADAGGAAA'
                                 onChange={(e) => updateScript(e.target.value)} />
                             <div className="script-btn">
                                 <PlayButton loading={launchScript} onClick={() => playScript()}></PlayButton>
