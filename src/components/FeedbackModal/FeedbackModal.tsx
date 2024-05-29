@@ -3,23 +3,24 @@ import { FC, useEffect, useState } from 'react';
 import './FeedbackModal.scss';
 
 interface FeedbackModalProps {
+    modalClosed: () => void;
     msg: string;
     type: string;
 }
  
-const FeedbackModal: FC<FeedbackModalProps> = ({msg, type}) => {
+const FeedbackModal: FC<FeedbackModalProps> = ({modalClosed, msg, type}) => {
     const [isDisplayed, setIsDisplayed] = useState(false);
 
-    const reset = () => {
+    function reset () {
         setIsDisplayed(false);
-        msg = "";
+        modalClosed();
     }
 
     useEffect(() => {
         if (msg.length > 0) {
             setIsDisplayed(true);
         }
-    }, [msg])
+    }, [msg, isDisplayed])
 
     return (
         <div className="feedback-modal" style={{display: (isDisplayed) ? 'flex' : "none"}}>

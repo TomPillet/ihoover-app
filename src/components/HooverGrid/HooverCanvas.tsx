@@ -27,15 +27,11 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
     const [useScript, setUseScript] = useState(false);
     const [scriptContent, setScriptContent] = useState('');
     const [launchScript, setLaunchScript] = useState(false);
-    const [scriptIteration, setScriptIteration] = useState(0);
+    const [scriptIteration, setScriptIteration] = useState(-1);
 
     const [launchMoveTo, setLaunchMoveTo] = useState(false);
     const [moveToX, setMoveToX] = useState(hoover.x);
     const [moveToY, setMoveToY] = useState(hoover.y);
-
-    const triggerFeedback = (msg: string, type: string) => {
-        hooverFeedback(msg, type);
-    }
 
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
@@ -46,19 +42,23 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
 
         if (!context) { return; }
 
-        if (launchScript) {
-            setTimeout(() => {
+        if (launchScript && scriptIteration > -1) {
+            let interval = window.setInterval(() => {
                 if (scriptIteration === scriptContent.length) {
-                    triggerFeedback("Weldone ! The script was executed to completion.", "success");
+                    triggerFeedback("Well done ! The script was executed to completion.", "success");
                     resetProcesses();
-                    return;
-                } else if (updateHoover(scriptContent.charAt(scriptIteration))) {
+                }
+                if (updateHoover(scriptContent.charAt(scriptIteration))) {
                     resetProcesses();
                 }
 
                 setScriptIteration(scriptIteration+1);
                 draw(context);
             }, animationSpeed);
+            
+            return () => {
+                window.clearInterval(interval);
+            }
         }
         else if (launchMoveTo) {
             setTimeout(() => {
@@ -209,15 +209,15 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         return false;
     }
 
-    function playMoveTo() {
+    function playMoveTo () {
         if (launchScript) { return; }
         setLaunchMoveTo(true);
     }
     function updateMoveToX (x: number) {
-        setMoveToX((x) ? x : 0);
+        setMoveToX(!x ? 0 : (x <= squaresX-1 ? x : squaresX-1));
     }
     function updateMoveToY (y: number) {
-        setMoveToY((y) ? y : 0);
+        setMoveToY(!y ? 0 : (y <= squaresY-1 ? y : squaresY-1));
     }
 
     function updateScript (value: string) {
@@ -225,15 +225,21 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         if (!(lastChar === "a" || lastChar === "d" || lastChar === "g" || !lastChar)) { return; }
         setScriptContent(value.toLowerCase());
     }
-    function playScript() {
+    function playScript () {
         if (launchMoveTo) { return; }
         setLaunchScript(true);
+        setScriptIteration(0);
     }
     
     function resetProcesses () {
-        setLaunchMoveTo(false);
         setLaunchScript(false);
-        setScriptIteration(0);  
+        setLaunchMoveTo(false);
+        setScriptIteration(-1);
+    }
+
+    function triggerFeedback (msg: string, type: string) {
+        hooverFeedback(msg, type);
+        resetProcesses();
     }
 
     return ( 
@@ -256,11 +262,11 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
                     <div className="hoover-move-to-inner">
                         <label htmlFor="move-toX">Move to X :
                             <input min="0" max={squaresX-1} type="number" className="input-number hoover-move-to" id="move-toX" disabled={launchMoveTo}
-                                value={moveToX} onChange={(e) => updateMoveToX(parseInt(e.target.value))}/>
+                                value={moveToX} onChange={(e) => setMoveToX(parseInt(e.target.value))} onBlur={(e) => updateMoveToX(parseInt(e.target.value))}/>
                         </label>
                         <label htmlFor="move-toY">Move to Y :
                             <input min="0" max={squaresY-1} type="number" className="input-number hoover-move-to" id="move-toY" disabled={launchMoveTo}
-                                value={moveToY} onChange={(e) => updateMoveToY(parseInt(e.target.value))}/>
+                                value={moveToY} onChange={(e) => setMoveToX(parseInt(e.target.value))} onBlur={(e) => updateMoveToY(parseInt(e.target.value))}/>
                         </label>
                         <div className="move-to-btn">
                             <PlayButton loading={launchMoveTo} onClick={() => playMoveTo()}></PlayButton>

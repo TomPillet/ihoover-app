@@ -9,20 +9,24 @@ function App() {
   const [squaresX, setSquaresX] = useState(10);
   const [squaresY, setSquaresY] = useState(10);
 
-  const updateSquaresX = (value: number) => {
+  function updateSquaresX (value: number) {
     setSquaresX((value) ? value : 1);
   }
-  const updateSquaresY = (value: number) => {
+  function updateSquaresY (value: number) {
     setSquaresY((value) ? value : 1);
   }
 
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
 
-  const hooverFeedback = (msg: string, type: string) => {
+  function hooverFeedback (msg: string, type: string) {
     setFeedbackMsg(msg);
     setFeedbackType(type);
   }
+  function resetFeedback () {
+    setFeedbackMsg("");
+    setFeedbackType("");
+  } 
 
   return (
     <div className="App">
@@ -38,8 +42,10 @@ function App() {
         </label>
       </div>
 
-      <HooverCanvas hooverFeedback={hooverFeedback} canvasHeight={squaresX*squareSize} canvasWidth={squaresY*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize} animationSpeed={200}></HooverCanvas>
-      <FeedbackModal msg={feedbackMsg} type={feedbackType}></FeedbackModal>
+      <p className='tips'>For better experience, use arrows up and down to edit inputs values.</p>
+
+      <HooverCanvas hooverFeedback={hooverFeedback} canvasHeight={squaresY*squareSize} canvasWidth={squaresX*squareSize} squaresX={squaresX} squaresY={squaresY} squareSize={squareSize} animationSpeed={200}></HooverCanvas>
+      <FeedbackModal modalClosed={resetFeedback} msg={feedbackMsg} type={feedbackType}></FeedbackModal>
     </div>
   );
 }
