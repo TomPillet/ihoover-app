@@ -90,18 +90,22 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
     function drawGrid (context: CanvasRenderingContext2D) {
         context.beginPath();
     
-        for (let x=0; x<=squaresX; x++) {
-            context.moveTo(x*squareSize, 0);
-            context.lineTo(x*squareSize, canvasHeight);
-        }
         for (let y=0; y<=squaresY; y++) {
             context.moveTo(0, y*squareSize);
             context.lineTo(canvasWidth, y*squareSize);
+            for (let x=0; x<=squaresX; x++) {
+                context.moveTo(x*squareSize, 0);
+                context.lineTo(x*squareSize, canvasHeight);
+
+                context.fillStyle = ((x+y) % 2 === 0) ? '#fff' : '#000';
+                context.fillRect(x*squareSize, y*squareSize, squareSize, squareSize)
+            }
         }
     
         context.strokeStyle = '#000';
         context.lineWidth = 1;
         context.stroke();
+
 
         context.closePath();
     }
@@ -126,11 +130,13 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         context.fillStyle = "#ffa07a";
         context.fill(path);
 
-        context.arc(0, -hoover.centerY, 3, 0, 2*Math.PI);
-        context.fillStyle = "#131313";
+        context.arc(0, -hoover.centerY, 4, 0, 2*Math.PI, false);
+        context.fillStyle = "#07ee04";
         context.fill();
       
         context.restore();
+
+        scrollCanvasTo(drawOffsetX, drawOffsetY);
     }
 
     function adjustHooverX() {
@@ -242,6 +248,12 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
 
     function triggerFeedback (msg: string, type: string) {
         hooverFeedback(msg, type);
+    }
+
+    function scrollCanvasTo(scrollX: number, scrollY: number) {
+        const parentHeightMiddle = canvas.current?.getContext("2d")?.canvas.parentElement?.clientHeight!/2;
+        const parentWidthMiddle = canvas.current?.getContext("2d")?.canvas.parentElement?.clientWidth!/2;
+        canvas.current?.getContext("2d")?.canvas.parentElement?.scrollTo(scrollX-parentWidthMiddle+2,scrollY-parentHeightMiddle+2);
     }
 
     return ( 
