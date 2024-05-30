@@ -43,13 +43,12 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         if (!context) { return; }
 
         if (launchScript && scriptIteration > -1) {
-            let interval = window.setInterval(() => {
+            let scriptInterval = window.setInterval(() => {
                 if (scriptIteration === scriptContent.length) {
-                    triggerFeedback("Well done ! The script was executed to completion.", "success");
-                    resetProcesses();
+                    resetProcesses(false);
                 }
                 if (updateHoover(scriptContent.charAt(scriptIteration))) {
-                    resetProcesses();
+                    resetProcesses(true);
                 }
 
                 setScriptIteration(scriptIteration+1);
@@ -57,20 +56,24 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
             }, animationSpeed);
             
             return () => {
-                window.clearInterval(interval);
+                window.clearInterval(scriptInterval);
             }
         }
         else if (launchMoveTo) {
-            setTimeout(() => {
+            let moveToInterval = window.setInterval(() => {
                 if (moveToX === hoover.x && moveToY === hoover.y) {
-                    resetProcesses();
+                    resetProcesses(false);
                     return;
                 }
 
                 adjustHooverX();
                 adjustHooverY();
                 draw(context);
-            }, animationSpeed)
+            }, animationSpeed);
+            
+            return () => {
+                window.clearInterval(moveToInterval);
+            }
         }
         else {
             draw(context);
@@ -162,9 +165,6 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
     }
   
     function updateHoover (movement: string): boolean | Error {
-        movement.toLowerCase();
-        const errorMsg = "Hoover encoutered an error and cannot perform your action." + (useScript ? " Execution of your script will be canceled." : "");
-
         if (movement === "d") {
             let nextDir = Cardinaux.of(CardinauxEnum).next(hoover.direction);
             setHoover(createNewHoover(hoover.x, hoover.y, nextDir));
@@ -177,28 +177,24 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
             switch (hoover.direction) {       
                 case CardinauxEnum.E:
                     if (hoover.x >= squaresX-1) {
-                        triggerFeedback(errorMsg, "error");
                         return Error("Hoover encountered an error."); 
                     }
                     setHoover(createNewHoover(hoover.x+1, hoover.y, hoover.direction));
                     break;
                 case CardinauxEnum.O:
                     if (hoover.x <= 0) {
-                        triggerFeedback(errorMsg, "error");
                         return Error("Hoover encounter an error.");
                     }
                     setHoover(createNewHoover(hoover.x-1, hoover.y, hoover.direction));
                     break;    
                 case CardinauxEnum.N:
                     if (hoover.y <= 0) {
-                        triggerFeedback(errorMsg, "error");
                         return Error("Hoover encounter an error.");
                     }
                     setHoover(createNewHoover(hoover.x, hoover.y-1, hoover.direction));
                     break;
                 case CardinauxEnum.S:
                     if (hoover.y >= squaresY-1) {
-                        triggerFeedback(errorMsg, "error");
                         return Error("Hoover encounter an error.");
                     }
                     setHoover(createNewHoover(hoover.x, hoover.y+1, hoover.direction));
@@ -231,7 +227,14 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
         setScriptIteration(0);
     }
     
-    function resetProcesses () {
+    function resetProcesses (error: boolean) {
+        if (error) {
+            const errorMsg = "Hoover encoutered an error and cannot perform your action." + (useScript ? " Execution of your script will be canceled." : "");
+            triggerFeedback(errorMsg, "error")
+        } else {
+            triggerFeedback("Well done ! The script was executed to completion.", "success");
+        }
+
         setLaunchScript(false);
         setLaunchMoveTo(false);
         setScriptIteration(-1);
@@ -239,7 +242,6 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
 
     function triggerFeedback (msg: string, type: string) {
         hooverFeedback(msg, type);
-        resetProcesses();
     }
 
     return ( 
@@ -266,7 +268,7 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
                         </label>
                         <label htmlFor="move-toY">Move to Y :
                             <input min="0" max={squaresY-1} type="number" className="input-number hoover-move-to" id="move-toY" disabled={launchMoveTo}
-                                value={moveToY} onChange={(e) => setMoveToX(parseInt(e.target.value))} onBlur={(e) => updateMoveToY(parseInt(e.target.value))}/>
+                                value={moveToY} onChange={(e) => setMoveToY(parseInt(e.target.value))} onBlur={(e) => updateMoveToY(parseInt(e.target.value))}/>
                         </label>
                         <div className="move-to-btn">
                             <PlayButton loading={launchMoveTo} onClick={() => playMoveTo()}></PlayButton>
@@ -294,9 +296,9 @@ const HooverCanvas: FC<HooverCanvasProps> = ({hooverFeedback, canvasHeight, canv
                         </div>
 
                         <div id="manual-instructions"  className={`instructions-card ${(useScript)? 'hide' : ''}`}>
-                            <button className="btn btn-action manual-btn" onClick={() => updateHoover("d")}>Droite</button>
-                            <button className="btn btn-action manual-btn" onClick={() => updateHoover("g")}>Gauche</button>
-                            <button className="btn btn-action manual-btn" onClick={() => updateHoover("a")}>Avant</button>
+                            <button className="btn btn-action manual-btn" onClick={() => (updateHoover("d") ? resetProcesses(true) : null)}>Droite</button>
+                            <button className="btn btn-action manual-btn" onClick={() => (updateHoover("g") ? resetProcesses(true) : null)}>Gauche</button>
+                            <button className="btn btn-action manual-btn" onClick={() => (updateHoover("a") ? resetProcesses(true) : null)}>Avant</button>
                         </div>
                     </div>
                 </div>
